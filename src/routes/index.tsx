@@ -367,10 +367,11 @@ function Faq() {
                 <AnimatePresence initial={false}>
                   {open === i && (
                     <motion.div
-                      initial={{ height: 0, opacity: 0, filter: "blur(8px)" }}
-                      animate={{ height: "auto", opacity: 1, filter: "blur(0px)" }}
-                      exit={{ height: 0, opacity: 0, filter: "blur(8px)" }}
-                      transition={{ duration: 0.7, ease }}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.5, ease }}
+
                     >
                       <p className="px-6 pb-6 text-sm leading-relaxed text-muted-foreground">
                         {item.a}
