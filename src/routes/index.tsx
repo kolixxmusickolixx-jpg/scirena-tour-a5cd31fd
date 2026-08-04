@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { motion, useScroll, useTransform, AnimatePresence } from "motion/react";
+import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "motion/react";
 import { useRef, useState } from "react";
 import { Reveal } from "@/components/Reveal";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
@@ -50,15 +50,15 @@ function Index() {
   useSmoothScroll();
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.35]);
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "12%"]);
-  const blur = useTransform(scrollYProgress, [0, 1], ["blur(0px)", "blur(10px)"]);
-  const fade = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const smooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
+  const scale = useTransform(smooth, [0, 1], [1, 1.18]);
+  const y = useTransform(smooth, [0, 1], ["0%", "10%"]);
+  const fade = useTransform(smooth, [0, 0.8], [1, 0]);
 
   return (
     <main className="relative">
       <Nav />
-      <Hero heroRef={heroRef} scale={scale} y={y} blur={blur} fade={fade} />
+      <Hero heroRef={heroRef} scale={scale} y={y} fade={fade} />
       <Upcoming />
       <Bio />
       <Cities />
@@ -98,15 +98,18 @@ function Nav() {
   );
 }
 
-function Hero({ heroRef, scale, y, blur, fade }: any) {
+function Hero({ heroRef, scale, y, fade }: any) {
   return (
     <section id="top" ref={heroRef} className="relative h-[100svh] overflow-hidden">
       <motion.img
         src={hero.url}
         alt="SCIRENA — тур УЕЗЖАЕМ ОСТАЁМСЯ? 2026"
-        style={{ scale, y, filter: blur }}
-        className="absolute inset-0 h-full w-full object-cover object-[60%_30%] opacity-70 grayscale contrast-110"
+        fetchPriority="high"
+        decoding="async"
+        style={{ scale, y, willChange: "transform", backfaceVisibility: "hidden" }}
+        className="absolute inset-0 h-full w-full object-cover object-[60%_30%] opacity-70 grayscale contrast-110 transform-gpu"
       />
+
       <div className="veil absolute inset-0" />
       <motion.div
         style={{ opacity: fade }}
@@ -312,7 +315,8 @@ function Cities() {
 function QuoteScreen() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], ["-12%", "12%"]);
+  const smooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
+  const y = useTransform(smooth, [0, 1], ["-8%", "8%"]);
 
   return (
     <section ref={ref} className="relative h-[100svh] overflow-hidden">
@@ -320,9 +324,11 @@ function QuoteScreen() {
         src={quoteImg.url}
         alt="SCIRENA на концерте тура"
         loading="lazy"
-        style={{ y, scale: 1.25 }}
-        className="absolute inset-0 h-full w-full object-cover opacity-60 grayscale contrast-110"
+        decoding="async"
+        style={{ y, scale: 1.25, willChange: "transform", backfaceVisibility: "hidden" }}
+        className="absolute inset-0 h-full w-full object-cover opacity-60 grayscale contrast-110 transform-gpu"
       />
+
       <div className="veil absolute inset-0" />
       <div className="relative z-10 flex h-full items-center justify-center px-6">
         <Reveal>
@@ -361,10 +367,11 @@ function Faq() {
                 <AnimatePresence initial={false}>
                   {open === i && (
                     <motion.div
-                      initial={{ height: 0, opacity: 0, filter: "blur(8px)" }}
-                      animate={{ height: "auto", opacity: 1, filter: "blur(0px)" }}
-                      exit={{ height: 0, opacity: 0, filter: "blur(8px)" }}
-                      transition={{ duration: 0.7, ease }}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.5, ease }}
+
                     >
                       <p className="px-6 pb-6 text-sm leading-relaxed text-muted-foreground">
                         {item.a}
