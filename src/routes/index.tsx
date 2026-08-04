@@ -58,7 +58,7 @@ function Index() {
   return (
     <main className="relative">
       <Nav />
-      <Hero heroRef={heroRef} scale={scale} y={y} blur={blur} fade={fade} />
+      <Hero heroRef={heroRef} scale={scale} y={y} fade={fade} />
       <Upcoming />
       <Bio />
       <Cities />
