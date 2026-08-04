@@ -50,10 +50,10 @@ function Index() {
   useSmoothScroll();
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.35]);
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "12%"]);
-  const blur = useTransform(scrollYProgress, [0, 1], ["blur(0px)", "blur(10px)"]);
-  const fade = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const smooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
+  const scale = useTransform(smooth, [0, 1], [1, 1.18]);
+  const y = useTransform(smooth, [0, 1], ["0%", "10%"]);
+  const fade = useTransform(smooth, [0, 0.8], [1, 0]);
 
   return (
     <main className="relative">
