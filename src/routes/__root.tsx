@@ -77,14 +77,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SCIRENA — Тур «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026" },
+      { title: "SCIRENA — тур «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026 | Билеты" },
       {
         name: "description",
-        content: "Официальный сайт концертного тура SCIRENA «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026.",
+        content: "Новый концертный тур SCIRENA «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026. Даты, города, площадки и билеты на концерты по всей России.",
       },
       { name: "author", content: "SCIRENA" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:title", content: "SCIRENA — тур «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026 | Билеты" },
+      { name: "twitter:title", content: "SCIRENA — тур «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026 | Билеты" },
+      { property: "og:description", content: "Новый концертный тур SCIRENA «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026. Даты, города, площадки и билеты на концерты по всей России." },
+      { name: "twitter:description", content: "Новый концертный тур SCIRENA «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026. Даты, города, площадки и билеты на концерты по всей России." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7cdc0b22-acac-46f4-b076-494a525ca98a/id-preview-89bf0ad0--e406177f-7c16-4c04-a703-b57e9e631364.lovable.app-1785875604168.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7cdc0b22-acac-46f4-b076-494a525ca98a/id-preview-89bf0ad0--e406177f-7c16-4c04-a703-b57e9e631364.lovable.app-1785875604168.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

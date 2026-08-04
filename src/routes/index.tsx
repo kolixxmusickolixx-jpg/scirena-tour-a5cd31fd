@@ -18,10 +18,10 @@ export const Route = createFileRoute("/")({
         content:
           "Новый концертный тур SCIRENA «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026. Даты, города, площадки и билеты на концерты по всей России.",
       },
-      { property: "og:title", content: "SCIRENA — тур «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026" },
+      { property: "og:title", content: "SCIRENA — тур «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026 | Билеты" },
       {
         property: "og:description",
-        content: "Концертный тур SCIRENA 2026: города, даты и билеты.",
+        content: "Новый концертный тур SCIRENA «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026. Даты, города, площадки и билеты на концерты по всей России.",
       },
       { property: "og:type", content: "website" },
       { property: "og:image", content: hero.url },
