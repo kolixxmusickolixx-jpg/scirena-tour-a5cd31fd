@@ -3,8 +3,12 @@ import Lenis from "lenis";
 
 export function useSmoothScroll() {
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
     const lenis = new Lenis({
-      duration: 1.4,
+      duration: 1.1,
+      lerp: 0.12,
+      syncTouch: false,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });
     let raf = 0;
