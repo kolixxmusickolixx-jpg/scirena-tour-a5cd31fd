@@ -4,10 +4,10 @@ import { useRef, useState } from "react";
 import { Reveal } from "@/components/Reveal";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 import { shows, faq } from "@/lib/tour-data";
-import hero from "@/assets/IMG_20260804_232616_195.jpg.asset.json";
-import portrait from "@/assets/IMG_20260804_232611_238.jpg.asset.json";
-import quoteImg from "@/assets/IMG_20260804_232724_950.jpg.asset.json";
-import alt1 from "@/assets/IMG_20260804_232720_983.jpg.asset.json";
+const hero = { url: "/img/IMG_20260804_232616_195.jpg" };
+const portrait = { url: "/img/IMG_20260804_232611_238.jpg" };
+const quoteImg = { url: "/img/IMG_20260804_232724_950.jpg" };
+const alt1 = { url: "/img/IMG_20260804_232720_983.jpg" };
 
 export const Route = createFileRoute("/")({
   head: () => ({
