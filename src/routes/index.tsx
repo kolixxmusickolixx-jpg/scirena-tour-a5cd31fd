@@ -315,7 +315,8 @@ function Cities() {
 function QuoteScreen() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], ["-12%", "12%"]);
+  const smooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
+  const y = useTransform(smooth, [0, 1], ["-8%", "8%"]);
 
   return (
     <section ref={ref} className="relative h-[100svh] overflow-hidden">
@@ -323,9 +324,11 @@ function QuoteScreen() {
         src={quoteImg.url}
         alt="SCIRENA на концерте тура"
         loading="lazy"
-        style={{ y, scale: 1.25 }}
-        className="absolute inset-0 h-full w-full object-cover opacity-60 grayscale contrast-110"
+        decoding="async"
+        style={{ y, scale: 1.25, willChange: "transform", backfaceVisibility: "hidden" }}
+        className="absolute inset-0 h-full w-full object-cover opacity-60 grayscale contrast-110 transform-gpu"
       />
+
       <div className="veil absolute inset-0" />
       <div className="relative z-10 flex h-full items-center justify-center px-6">
         <Reveal>
