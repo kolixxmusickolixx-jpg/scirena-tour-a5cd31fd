@@ -98,15 +98,18 @@ function Nav() {
   );
 }
 
-function Hero({ heroRef, scale, y, blur, fade }: any) {
+function Hero({ heroRef, scale, y, fade }: any) {
   return (
     <section id="top" ref={heroRef} className="relative h-[100svh] overflow-hidden">
       <motion.img
         src={hero.url}
         alt="SCIRENA — тур УЕЗЖАЕМ ОСТАЁМСЯ? 2026"
-        style={{ scale, y, filter: blur }}
-        className="absolute inset-0 h-full w-full object-cover object-[60%_30%] opacity-70 grayscale contrast-110"
+        fetchPriority="high"
+        decoding="async"
+        style={{ scale, y, willChange: "transform", backfaceVisibility: "hidden" }}
+        className="absolute inset-0 h-full w-full object-cover object-[60%_30%] opacity-70 grayscale contrast-110 transform-gpu"
       />
+
       <div className="veil absolute inset-0" />
       <motion.div
         style={{ opacity: fade }}
