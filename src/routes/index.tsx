@@ -105,7 +105,7 @@ function Hero({ heroRef, scale, y, blur, fade }: any) {
         src={hero.url}
         alt="SCIRENA — тур УЕЗЖАЕМ ОСТАЁМСЯ? 2026"
         style={{ scale, y, filter: blur }}
-        className="absolute inset-0 h-full w-full object-cover object-[60%_30%] opacity-70"
+        className="absolute inset-0 h-full w-full object-cover object-[60%_30%] opacity-70 grayscale contrast-110"
       />
       <div className="veil absolute inset-0" />
       <motion.div
@@ -240,7 +240,7 @@ function Bio() {
               loading="lazy"
               whileHover={{ scale: 1.06 }}
               transition={{ duration: 1.2, ease }}
-              className="aspect-[3/4] w-full object-cover"
+              className="aspect-[3/4] w-full object-cover grayscale contrast-110"
             />
             <div className="pointer-events-none absolute inset-0 veil opacity-60" />
           </div>
@@ -321,7 +321,7 @@ function QuoteScreen() {
         alt="SCIRENA на концерте тура"
         loading="lazy"
         style={{ y, scale: 1.25 }}
-        className="absolute inset-0 h-full w-full object-cover opacity-60"
+        className="absolute inset-0 h-full w-full object-cover opacity-60 grayscale contrast-110"
       />
       <div className="veil absolute inset-0" />
       <div className="relative z-10 flex h-full items-center justify-center px-6">
@@ -390,7 +390,7 @@ function Footer() {
         alt=""
         aria-hidden
         loading="lazy"
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-10 blur-2xl"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-10 blur-2xl grayscale"
       />
       <div className="relative mx-auto max-w-7xl">
         <Reveal>
