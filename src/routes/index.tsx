@@ -139,7 +139,7 @@ function Hero({ heroRef, scale, y, fade }: any) {
             SCIRENA
           </motion.p>
 
-          <h1 className="font-display text-[clamp(2.4rem,11.5vw,10rem)] leading-[0.9] font-extrabold tracking-[-0.02em] break-words hyphens-none sm:leading-[0.86] lg:text-[8.5vw]">
+          <h1 className="font-display text-[clamp(2.6rem,12.8vw,10rem)] leading-[0.9] font-extrabold tracking-[-0.02em] break-words hyphens-none sm:leading-[0.86] lg:text-[8.5vw]">
             {["УЕЗЖАЕМ", "ОСТАЁМСЯ?"].map((word, i) => (
               <span key={word} className="block overflow-hidden">
                 <motion.span
