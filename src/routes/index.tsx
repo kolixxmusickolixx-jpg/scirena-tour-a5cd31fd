@@ -5,7 +5,9 @@ import { Reveal } from "@/components/Reveal";
 import { ResponsiveImage } from "@/components/ResponsiveImage";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
-import { shows, faq } from "@/lib/tour-data";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { siteQuery } from "@/lib/site-query";
+import type { SiteData } from "@/lib/site.functions";
 const hero = { base: "IMG_20260804_232616_195", url: "/img/IMG_20260804_232616_195-1600.webp" };
 const portrait = { base: "IMG_20260804_232611_238" };
 const quoteImg = { base: "IMG_20260804_232724_950" };
@@ -54,12 +56,16 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
+  loader: ({ context }) => {
+    context.queryClient.ensureQueryData(siteQuery);
+  },
   component: Index,
 });
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
 function Index() {
+  const { data } = useSuspenseQuery(siteQuery);
   useSmoothScroll();
   const isMobile = useIsMobile();
   const heroRef = useRef<HTMLDivElement>(null);
@@ -72,13 +78,13 @@ function Index() {
   return (
     <main className="relative">
       <Nav />
-      <Hero heroRef={heroRef} scale={scale} y={y} fade={fade} />
-      <Upcoming />
-      <Bio />
-      <Cities />
-      <QuoteScreen />
-      <Faq />
-      <Footer />
+      <Hero heroRef={heroRef} scale={scale} y={y} fade={fade} data={data} />
+      <Upcoming data={data} />
+      <Bio data={data} />
+      <Cities data={data} />
+      <QuoteScreen data={data} />
+      <Faq data={data} />
+      <Footer data={data} />
     </main>
   );
 }
@@ -112,7 +118,8 @@ function Nav() {
   );
 }
 
-function Hero({ heroRef, scale, y, fade }: any) {
+function Hero({ heroRef, scale, y, fade, data }: any) {
+  const c = (data as SiteData).content;
   return (
     <section id="top" ref={heroRef} className="relative h-[100svh] overflow-hidden">
       <ResponsiveImage
@@ -136,11 +143,11 @@ function Hero({ heroRef, scale, y, fade }: any) {
             transition={{ duration: 1.2, delay: 0.3, ease }}
             className="mb-6 text-xs tracking-[0.4em] text-muted-foreground"
           >
-            SCIRENA
+            {c["hero_artist"] ?? "SCIRENA"}
           </motion.p>
 
           <h1 className="font-display text-[clamp(2.6rem,12.8vw,10rem)] leading-[0.9] font-extrabold tracking-[-0.02em] break-words hyphens-none sm:leading-[0.86] lg:text-[8.5vw]">
-            {["УЕЗЖАЕМ", "ОСТАЁМСЯ?"].map((word, i) => (
+            {[c["hero_title_line1"] ?? "УЕЗЖАЕМ", c["hero_title_line2"] ?? "ОСТАЁМСЯ?"].map((word, i) => (
               <span key={word} className="block overflow-hidden">
                 <motion.span
                   className="block"
@@ -162,7 +169,7 @@ function Hero({ heroRef, scale, y, fade }: any) {
                 transition={{ duration: 1, delay: 0.9, ease }}
                 className="font-display text-sm tracking-[0.5em] text-muted-foreground"
               >
-                ТУР 2026
+                {c["hero_tour_label"] ?? "ТУР 2026"}
               </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
@@ -190,7 +197,7 @@ function Hero({ heroRef, scale, y, fade }: any) {
               transition={{ duration: 1.4, delay: 1.2, ease }}
               className="max-w-[16rem] text-xs leading-relaxed text-muted-foreground sm:text-sm sm:text-right"
             >
-              «Новый концертный тур SCIRENA»
+              {c["hero_note"] ?? ""}
             </motion.p>
           </div>
         </div>
@@ -210,14 +217,15 @@ function SectionTitle({ kicker, title }: { kicker: string; title: string }) {
   );
 }
 
-function Upcoming() {
+function Upcoming({ data }: { data: SiteData }) {
+  const shows = data.shows;
   return (
     <section id="shows" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
       <div className="mx-auto max-w-7xl">
         <SectionTitle kicker="РАСПИСАНИЕ" title="БЛИЖАЙШИЕ КОНЦЕРТЫ" />
         <div className="mt-14 grid gap-4 md:grid-cols-2">
           {shows.slice(0, 4).map((s, i) => (
-            <Reveal key={s.city} delay={i * 0.08}>
+            <Reveal key={s.id} delay={i * 0.08}>
               <motion.article
                 whileHover={{ scale: 1.025 }}
                 transition={{ duration: 0.7, ease }}
@@ -225,13 +233,13 @@ function Upcoming() {
               >
                 <div className="min-w-0">
                   <p className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-                    {s.date}
+                    {s.date_label}
                   </p>
                   <p className="mt-3 text-lg break-words text-foreground">{s.city}</p>
                   <p className="mt-1 text-sm break-words text-muted-foreground">{s.venue}</p>
                 </div>
                 <a
-                  href="#cities"
+                  href={s.ticket_url || "#cities"}
                   className="shrink-0 rounded-full border border-border px-6 py-3 text-center text-[0.65rem] tracking-[0.2em] text-foreground transition-all duration-500 hover:bg-primary hover:text-primary-foreground"
                 >
                   КУПИТЬ
@@ -245,7 +253,8 @@ function Upcoming() {
   );
 }
 
-function Bio() {
+function Bio({ data }: { data: SiteData }) {
+  const c = data.content;
   return (
     <section id="bio" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
       <div className="mx-auto grid max-w-7xl gap-10 sm:gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
@@ -263,12 +272,7 @@ function Bio() {
         <div>
           <SectionTitle kicker="ОБ АРТИСТКЕ" title="БИОГРАФИЯ" />
           <div className="mt-8 space-y-5 text-sm leading-relaxed text-muted-foreground sm:text-base">
-            {[
-              "SCIRENA — российская певица нового поколения, чей стиль объединяет современный поп, R&B и атмосферную электронную музыку. Её песни наполнены личными переживаниями, искренними эмоциями и кинематографичным звучанием, благодаря чему находят отклик у тысяч слушателей.",
-              "Музыка SCIRENA рассказывает истории о любви, расставаниях, взрослении, поиске себя и внутренней свободе. Каждая композиция становится отдельной главой большой истории, а живые выступления превращаются в эмоциональное путешествие, где зритель чувствует себя частью происходящего.",
-              "За последние годы артистка собрала преданную аудиторию по всей России. Её концерты отличаются живым звучанием, сильной визуальной составляющей и особой атмосферой, которая остаётся со зрителями ещё долго после окончания шоу.",
-              "Тур «УЕЗЖАЕМ ОСТАЁМСЯ?» — это новая глава творчества SCIRENA, объединяющая музыку, свет, эмоции и истории в единое концертное путешествие.",
-            ].map((p, i) => (
+            {[c["bio_p1"], c["bio_p2"], c["bio_p3"], c["bio_p4"]].filter(Boolean).map((p, i) => (
               <Reveal key={i} delay={i * 0.06}>
                 <p>{p}</p>
               </Reveal>
@@ -280,14 +284,15 @@ function Bio() {
   );
 }
 
-function Cities() {
+function Cities({ data }: { data: SiteData }) {
+  const shows = data.shows;
   return (
     <section id="cities" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
       <div className="mx-auto max-w-7xl">
         <SectionTitle kicker="ТУР 2026" title="ГОРОДА ТУРА" />
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {shows.map((s, i) => (
-            <Reveal key={s.city + s.date} delay={(i % 3) * 0.08}>
+            <Reveal key={s.id} delay={(i % 3) * 0.08}>
               <motion.article
                 whileHover={{ scale: 1.03, y: -4 }}
                 transition={{ duration: 0.7, ease }}
@@ -295,7 +300,7 @@ function Cities() {
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-xs tracking-[0.25em] text-muted-foreground">
-                    {s.day} · {s.date}
+                    {s.day_label} · {s.date_label}
                   </span>
                   <span
                     className={`shrink-0 rounded-full border border-border px-3 py-1 text-[0.6rem] tracking-[0.14em] ${
@@ -324,7 +329,7 @@ function Cities() {
   );
 }
 
-function QuoteScreen() {
+function QuoteScreen({ data }: { data: SiteData }) {
   const isMobile = useIsMobile();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
@@ -349,7 +354,7 @@ function QuoteScreen() {
       <div className="relative z-10 flex h-full items-center justify-center px-6">
         <Reveal>
           <p className="font-display max-w-4xl text-center text-xl leading-[1.3] font-semibold text-balance-lux sm:text-4xl sm:leading-[1.25] lg:text-5xl">
-            «Каждый концерт — это история, которую мы проживаем вместе.»
+            {data.content["quote"] ?? ""}
           </p>
         </Reveal>
       </div>
@@ -357,7 +362,8 @@ function QuoteScreen() {
   );
 }
 
-function Faq() {
+function Faq({ data }: { data: SiteData }) {
+  const faq = data.faq;
   const [open, setOpen] = useState<number | null>(0);
   return (
     <section id="faq" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
@@ -365,13 +371,13 @@ function Faq() {
         <SectionTitle kicker="ПОМОЩЬ" title="FAQ" />
         <div className="mt-12 space-y-3">
           {faq.map((item, i) => (
-            <Reveal key={item.q} delay={i * 0.06}>
+            <Reveal key={item.id} delay={i * 0.06}>
               <div className="glass overflow-hidden rounded-2xl">
                 <button
                   onClick={() => setOpen(open === i ? null : i)}
                   className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-6 py-5 text-left"
                 >
-                  <span className="text-sm break-words text-foreground sm:text-lg">{item.q}</span>
+                  <span className="text-sm break-words text-foreground sm:text-lg">{item.question}</span>
                   <motion.span
                     animate={{ rotate: open === i ? 45 : 0 }}
                     transition={{ duration: 0.6, ease }}
@@ -390,7 +396,7 @@ function Faq() {
 
                     >
                       <p className="px-6 pb-6 text-sm leading-relaxed text-muted-foreground">
-                        {item.a}
+                        {item.answer}
                       </p>
                     </motion.div>
                   )}
@@ -404,8 +410,8 @@ function Faq() {
   );
 }
 
-function Footer() {
-  const socials = ["Telegram", "VK", "YouTube", "Instagram", "TikTok"];
+function Footer({ data }: { data: SiteData }) {
+  const socials = data.socials;
   return (
     <footer className="relative overflow-hidden border-t border-border px-5 pt-24 pb-10 sm:px-10 lg:px-16">
       <ResponsiveImage
@@ -424,13 +430,22 @@ function Footer() {
         <div className="mt-10 grid gap-8 sm:mt-14 sm:flex sm:items-end sm:justify-between">
           <div className="flex flex-wrap gap-x-6 gap-y-3 text-xs tracking-[0.2em] text-muted-foreground">
             {socials.map((s) => (
-              <a key={s} href="#top" className="transition-colors hover:text-foreground">
-                {s.toUpperCase()}
+              <a
+                key={s.id}
+                href={s.url || "#top"}
+                target={s.url?.startsWith("http") ? "_blank" : undefined}
+                rel="noreferrer"
+                className="transition-colors hover:text-foreground"
+              >
+                {s.label.toUpperCase()}
               </a>
             ))}
           </div>
           <div className="text-xs tracking-[0.2em] text-muted-foreground">
-            <a href="#top" className="block transition-colors hover:text-foreground">
+            <a
+              href={data.content["privacy_url"] || "#top"}
+              className="block transition-colors hover:text-foreground"
+            >
               ПОЛИТИКА КОНФИДЕНЦИАЛЬНОСТИ
             </a>
             <p className="mt-3">© SCIRENA TOUR 2026</p>
