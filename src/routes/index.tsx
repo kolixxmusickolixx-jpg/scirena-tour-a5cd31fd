@@ -2,12 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "motion/react";
 import { useRef, useState } from "react";
 import { Reveal } from "@/components/Reveal";
+import { ResponsiveImage } from "@/components/ResponsiveImage";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 import { shows, faq } from "@/lib/tour-data";
-const hero = { url: "/img/IMG_20260804_232616_195.jpg" };
-const portrait = { url: "/img/IMG_20260804_232611_238.jpg" };
-const quoteImg = { url: "/img/IMG_20260804_232724_950.jpg" };
-const alt1 = { url: "/img/IMG_20260804_232720_983.jpg" };
+const hero = { base: "IMG_20260804_232616_195", url: "/img/IMG_20260804_232616_195-1600.webp" };
+const portrait = { base: "IMG_20260804_232611_238" };
+const quoteImg = { base: "IMG_20260804_232724_950" };
+const alt1 = { base: "IMG_20260804_232720_983" };
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,6 +29,17 @@ export const Route = createFileRoute("/")({
       { property: "og:image", content: hero.url },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: hero.url },
+    ],
+    links: [
+      {
+        rel: "preload",
+        as: "image",
+        href: "/img/IMG_20260804_232616_195-1080.webp",
+        imagesrcset:
+          "/img/IMG_20260804_232616_195-640.webp 640w, /img/IMG_20260804_232616_195-1080.webp 1080w, /img/IMG_20260804_232616_195-1600.webp 1600w",
+        imagesizes: "100vw",
+        fetchpriority: "high",
+      },
     ],
     scripts: [
       {
@@ -48,11 +61,12 @@ const ease = [0.16, 1, 0.3, 1] as const;
 
 function Index() {
   useSmoothScroll();
+  const isMobile = useIsMobile();
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const smooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
-  const scale = useTransform(smooth, [0, 1], [1, 1.18]);
-  const y = useTransform(smooth, [0, 1], ["0%", "10%"]);
+  const scale = useTransform(smooth, [0, 1], isMobile ? [1, 1] : [1, 1.18]);
+  const y = useTransform(smooth, [0, 1], isMobile ? ["0%", "0%"] : ["0%", "10%"]);
   const fade = useTransform(smooth, [0, 0.8], [1, 0]);
 
   return (
@@ -101,19 +115,19 @@ function Nav() {
 function Hero({ heroRef, scale, y, fade }: any) {
   return (
     <section id="top" ref={heroRef} className="relative h-[100svh] overflow-hidden">
-      <motion.img
-        src={hero.url}
+      <ResponsiveImage
+        base={hero.base}
         alt="SCIRENA — тур УЕЗЖАЕМ ОСТАЁМСЯ? 2026"
-        fetchPriority="high"
-        decoding="async"
+        priority
+        sizes="100vw"
         style={{ scale, y, willChange: "transform", backfaceVisibility: "hidden" }}
-        className="absolute inset-0 h-full w-full object-cover object-[60%_30%] opacity-70 grayscale contrast-110 transform-gpu"
+        className="absolute inset-0 h-full w-full object-cover object-[60%_30%] opacity-70 transform-gpu"
       />
 
       <div className="veil absolute inset-0" />
       <motion.div
         style={{ opacity: fade }}
-        className="relative z-10 flex h-full flex-col justify-end px-5 pb-16 sm:px-10 lg:px-16"
+        className="relative z-10 flex h-full flex-col justify-end px-5 pb-12 sm:px-10 sm:pb-16 lg:px-16"
       >
         <div className="mx-auto w-full max-w-7xl">
           <motion.p
@@ -125,7 +139,7 @@ function Hero({ heroRef, scale, y, fade }: any) {
             SCIRENA
           </motion.p>
 
-          <h1 className="font-display text-[13vw] leading-[0.86] font-extrabold tracking-tight sm:text-[10vw] lg:text-[8.5vw]">
+          <h1 className="font-display text-[clamp(2.6rem,12.8vw,10rem)] leading-[0.9] font-extrabold tracking-[-0.02em] break-words hyphens-none sm:leading-[0.86] lg:text-[8.5vw]">
             {["УЕЗЖАЕМ", "ОСТАЁМСЯ?"].map((word, i) => (
               <span key={word} className="block overflow-hidden">
                 <motion.span
@@ -140,7 +154,7 @@ function Hero({ heroRef, scale, y, fade }: any) {
             ))}
           </h1>
 
-          <div className="mt-8 grid gap-8 sm:flex sm:items-end sm:justify-between">
+          <div className="mt-6 grid gap-6 sm:mt-8 sm:gap-8 sm:flex sm:items-end sm:justify-between">
             <div>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
@@ -154,17 +168,17 @@ function Hero({ heroRef, scale, y, fade }: any) {
                 initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 1.1, delay: 1.05, ease }}
-                className="mt-6 flex flex-wrap gap-3"
+                className="mt-5 grid grid-cols-1 gap-3 sm:mt-6 sm:flex sm:flex-wrap"
               >
                 <a
                   href="#cities"
-                  className="rounded-full bg-primary px-8 py-4 text-xs font-semibold tracking-[0.2em] text-primary-foreground transition-all duration-500 hover:scale-[1.04] hover:opacity-90"
+                  className="rounded-full bg-primary px-8 py-4 text-center text-xs font-semibold tracking-[0.2em] text-primary-foreground transition-all duration-500 hover:scale-[1.04] hover:opacity-90"
                 >
                   КУПИТЬ БИЛЕТ
                 </a>
                 <a
                   href="#shows"
-                  className="glass rounded-full px-8 py-4 text-xs font-semibold tracking-[0.2em] text-foreground transition-all duration-500 hover:scale-[1.04]"
+                  className="glass rounded-full px-8 py-4 text-center text-xs font-semibold tracking-[0.2em] text-foreground transition-all duration-500 hover:scale-[1.04]"
                 >
                   ВСЕ ГОРОДА
                 </a>
@@ -174,7 +188,7 @@ function Hero({ heroRef, scale, y, fade }: any) {
               initial={{ opacity: 0, filter: "blur(12px)" }}
               animate={{ opacity: 1, filter: "blur(0px)" }}
               transition={{ duration: 1.4, delay: 1.2, ease }}
-              className="max-w-[16rem] text-sm leading-relaxed text-muted-foreground sm:text-right"
+              className="max-w-[16rem] text-xs leading-relaxed text-muted-foreground sm:text-sm sm:text-right"
             >
               «Новый концертный тур SCIRENA»
             </motion.p>
@@ -189,7 +203,7 @@ function SectionTitle({ kicker, title }: { kicker: string; title: string }) {
   return (
     <Reveal>
       <p className="mb-4 text-[0.65rem] tracking-[0.4em] text-muted-foreground">{kicker}</p>
-      <h2 className="font-display text-[9vw] leading-[0.95] font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+      <h2 className="font-display text-[clamp(1.9rem,8.5vw,3rem)] leading-[1] font-extrabold tracking-tight break-words sm:text-5xl lg:text-6xl">
         {title}
       </h2>
     </Reveal>
@@ -198,7 +212,7 @@ function SectionTitle({ kicker, title }: { kicker: string; title: string }) {
 
 function Upcoming() {
   return (
-    <section id="shows" className="relative px-5 py-28 sm:px-10 lg:px-16">
+    <section id="shows" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
       <div className="mx-auto max-w-7xl">
         <SectionTitle kicker="РАСПИСАНИЕ" title="БЛИЖАЙШИЕ КОНЦЕРТЫ" />
         <div className="mt-14 grid gap-4 md:grid-cols-2">
@@ -207,18 +221,18 @@ function Upcoming() {
               <motion.article
                 whileHover={{ scale: 1.025 }}
                 transition={{ duration: 0.7, ease }}
-                className="glass grid grid-cols-[minmax(0,1fr)_auto] items-center gap-5 rounded-2xl p-6 sm:p-8"
+                className="glass grid gap-5 rounded-2xl p-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-8"
               >
                 <div className="min-w-0">
                   <p className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
                     {s.date}
                   </p>
-                  <p className="mt-3 truncate text-lg text-foreground">{s.city}</p>
-                  <p className="mt-1 truncate text-sm text-muted-foreground">{s.venue}</p>
+                  <p className="mt-3 text-lg break-words text-foreground">{s.city}</p>
+                  <p className="mt-1 text-sm break-words text-muted-foreground">{s.venue}</p>
                 </div>
                 <a
                   href="#cities"
-                  className="shrink-0 rounded-full border border-border px-6 py-3 text-[0.65rem] tracking-[0.2em] text-foreground transition-all duration-500 hover:bg-primary hover:text-primary-foreground"
+                  className="shrink-0 rounded-full border border-border px-6 py-3 text-center text-[0.65rem] tracking-[0.2em] text-foreground transition-all duration-500 hover:bg-primary hover:text-primary-foreground"
                 >
                   КУПИТЬ
                 </a>
@@ -233,17 +247,15 @@ function Upcoming() {
 
 function Bio() {
   return (
-    <section id="bio" className="relative px-5 py-28 sm:px-10 lg:px-16">
-      <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+    <section id="bio" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
+      <div className="mx-auto grid max-w-7xl gap-10 sm:gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
         <Reveal>
           <div className="relative overflow-hidden rounded-3xl">
-            <motion.img
-              src={portrait.url}
+            <ResponsiveImage
+              base={portrait.base}
               alt="Портрет SCIRENA"
-              loading="lazy"
-              whileHover={{ scale: 1.06 }}
-              transition={{ duration: 1.2, ease }}
-              className="aspect-[3/4] w-full object-cover grayscale contrast-110"
+              sizes="(min-width: 1024px) 45vw, 100vw"
+              className="aspect-[3/4] w-full object-cover"
             />
             <div className="pointer-events-none absolute inset-0 veil opacity-60" />
           </div>
@@ -270,7 +282,7 @@ function Bio() {
 
 function Cities() {
   return (
-    <section id="cities" className="relative px-5 py-28 sm:px-10 lg:px-16">
+    <section id="cities" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
       <div className="mx-auto max-w-7xl">
         <SectionTitle kicker="ТУР 2026" title="ГОРОДА ТУРА" />
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -281,7 +293,7 @@ function Cities() {
                 transition={{ duration: 0.7, ease }}
                 className="glass flex h-full flex-col rounded-2xl p-6"
               >
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-xs tracking-[0.25em] text-muted-foreground">
                     {s.day} · {s.date}
                   </span>
@@ -293,7 +305,7 @@ function Cities() {
                     {s.status.toUpperCase()}
                   </span>
                 </div>
-                <h3 className="font-display mt-6 truncate text-2xl font-bold tracking-tight">
+                <h3 className="font-display mt-6 text-2xl font-bold tracking-tight break-words">
                   {s.city}
                 </h3>
                 <p className="mt-2 text-sm text-muted-foreground">{s.venue}</p>
@@ -313,26 +325,30 @@ function Cities() {
 }
 
 function QuoteScreen() {
+  const isMobile = useIsMobile();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const smooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
   const y = useTransform(smooth, [0, 1], ["-8%", "8%"]);
 
   return (
-    <section ref={ref} className="relative h-[100svh] overflow-hidden">
-      <motion.img
-        src={quoteImg.url}
+    <section ref={ref} className="relative h-[70svh] overflow-hidden sm:h-[100svh]">
+      <ResponsiveImage
+        base={quoteImg.base}
         alt="SCIRENA на концерте тура"
-        loading="lazy"
-        decoding="async"
-        style={{ y, scale: 1.25, willChange: "transform", backfaceVisibility: "hidden" }}
-        className="absolute inset-0 h-full w-full object-cover opacity-60 grayscale contrast-110 transform-gpu"
+        sizes="100vw"
+        style={
+          isMobile
+            ? { willChange: "auto" }
+            : { y, scale: 1.25, willChange: "transform", backfaceVisibility: "hidden" }
+        }
+        className="absolute inset-0 h-full w-full object-cover opacity-60 transform-gpu"
       />
 
       <div className="veil absolute inset-0" />
       <div className="relative z-10 flex h-full items-center justify-center px-6">
         <Reveal>
-          <p className="font-display max-w-4xl text-center text-2xl leading-[1.25] font-semibold text-balance-lux sm:text-4xl lg:text-5xl">
+          <p className="font-display max-w-4xl text-center text-xl leading-[1.3] font-semibold text-balance-lux sm:text-4xl sm:leading-[1.25] lg:text-5xl">
             «Каждый концерт — это история, которую мы проживаем вместе.»
           </p>
         </Reveal>
@@ -344,7 +360,7 @@ function QuoteScreen() {
 function Faq() {
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <section id="faq" className="relative px-5 py-28 sm:px-10 lg:px-16">
+    <section id="faq" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
       <div className="mx-auto max-w-4xl">
         <SectionTitle kicker="ПОМОЩЬ" title="FAQ" />
         <div className="mt-12 space-y-3">
@@ -355,7 +371,7 @@ function Faq() {
                   onClick={() => setOpen(open === i ? null : i)}
                   className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-6 py-5 text-left"
                 >
-                  <span className="truncate text-base text-foreground sm:text-lg">{item.q}</span>
+                  <span className="text-sm break-words text-foreground sm:text-lg">{item.q}</span>
                   <motion.span
                     animate={{ rotate: open === i ? 45 : 0 }}
                     transition={{ duration: 0.6, ease }}
@@ -392,20 +408,20 @@ function Footer() {
   const socials = ["Telegram", "VK", "YouTube", "Instagram", "TikTok"];
   return (
     <footer className="relative overflow-hidden border-t border-border px-5 pt-24 pb-10 sm:px-10 lg:px-16">
-      <img
-        src={alt1.url}
+      <ResponsiveImage
+        base={alt1.base}
         alt=""
-        aria-hidden
-        loading="lazy"
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-10 blur-2xl grayscale"
+        ariaHidden
+        sizes="100vw"
+        className="pointer-events-none absolute inset-0 hidden h-full w-full object-cover opacity-10 blur-2xl sm:block"
       />
       <div className="relative mx-auto max-w-7xl">
         <Reveal>
-          <p className="font-display text-[16vw] leading-[0.85] font-extrabold tracking-tight lg:text-[11rem]">
+          <p className="font-display text-[clamp(3rem,15vw,11rem)] leading-[0.85] font-extrabold tracking-tight lg:text-[11rem]">
             SCIRENA
           </p>
         </Reveal>
-        <div className="mt-14 grid gap-8 sm:flex sm:items-end sm:justify-between">
+        <div className="mt-10 grid gap-8 sm:mt-14 sm:flex sm:items-end sm:justify-between">
           <div className="flex flex-wrap gap-x-6 gap-y-3 text-xs tracking-[0.2em] text-muted-foreground">
             {socials.map((s) => (
               <a key={s} href="#top" className="transition-colors hover:text-foreground">
