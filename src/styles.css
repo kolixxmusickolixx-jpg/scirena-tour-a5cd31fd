@@ -99,6 +99,16 @@
   backdrop-filter: blur(40px) saturate(140%);
 }
 
+/* Мобильные: убираем дорогие backdrop-фильтры ради плавности */
+@media (max-width: 767px) {
+  .glass,
+  .glass-strong {
+    backdrop-filter: none;
+    background: oklch(0.13 0 0 / 85%);
+  }
+}
+
+
 @utility veil {
   background-image: var(--gradient-veil);
 }
