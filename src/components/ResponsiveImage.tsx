@@ -26,14 +26,15 @@ export function ResponsiveImage({
       srcSet={srcSet}
       sizes={sizes}
       alt={alt}
-      aria-hidden={ariaHidden}
+      aria-hidden={ariaHidden ?? false}
       width={1440}
       height={1920}
       decoding="async"
       loading={priority ? "eager" : "lazy"}
       fetchPriority={priority ? "high" : "auto"}
-      style={style}
-      className={className}
+      style={style ?? {}}
+      className={className ?? ""}
     />
+
   );
 }
