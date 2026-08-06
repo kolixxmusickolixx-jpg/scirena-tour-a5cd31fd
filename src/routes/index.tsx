@@ -85,7 +85,9 @@ function Index() {
       <Cities data={data} />
       <QuoteScreen data={data} />
       <Faq data={data} />
+      <Gallery />
       <Footer data={data} />
+
     </main>
   );
 }
