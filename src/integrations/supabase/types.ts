@@ -41,6 +41,80 @@ export type Database = {
         }
         Relationships: []
       }
+      gallery_albums: {
+        Row: {
+          cover_url: string
+          created_at: string
+          date_label: string
+          id: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_url?: string
+          created_at?: string
+          date_label?: string
+          id?: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_url?: string
+          created_at?: string
+          date_label?: string
+          id?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      gallery_photos: {
+        Row: {
+          album_id: string
+          created_at: string
+          height: number | null
+          id: string
+          sort_order: number
+          storage_path: string
+          updated_at: string
+          url: string
+          width: number | null
+        }
+        Insert: {
+          album_id: string
+          created_at?: string
+          height?: number | null
+          id?: string
+          sort_order?: number
+          storage_path: string
+          updated_at?: string
+          url: string
+          width?: number | null
+        }
+        Update: {
+          album_id?: string
+          created_at?: string
+          height?: number | null
+          id?: string
+          sort_order?: number
+          storage_path?: string
+          updated_at?: string
+          url?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_photos_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "gallery_albums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shows: {
         Row: {
           city: string
