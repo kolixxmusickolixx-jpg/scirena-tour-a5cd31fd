@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { signPaths } from "@/lib/gallery";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -549,6 +550,217 @@ function ContentTab({ rows, onChange }: { rows: ContentRow[]; onChange: () => vo
       >
         СОХРАНИТЬ ТЕКСТЫ
       </button>
+    </div>
+  );
+}
+
+type AlbumRow = { id: string; title: string; date_label: string; sort_order: number };
+
+function GalleryTab() {
+  const qc = useQueryClient();
+  const refresh = () => qc.invalidateQueries({ queryKey: ["gallery"] });
+  const save = useSaver(refresh);
+
+  const albums = useQuery({
+    queryKey: ["gallery"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gallery_albums")
+        .select("id, title, date_label, sort_order")
+        .order("sort_order");
+      if (error) throw error;
+      return data as AlbumRow[];
+    },
+  });
+
+  const rows = albums.data ?? [];
+
+  return (
+    <div className="space-y-4">
+      <button
+        className={btnCls}
+        onClick={() =>
+          save(
+            () =>
+              supabase.from("gallery_albums").insert({
+                title: "Новый альбом",
+                date_label: new Date().toLocaleDateString("ru-RU"),
+                sort_order: (rows.at(-1)?.sort_order ?? 0) + 1,
+              }),
+            "Альбом создан",
+          )
+        }
+      >
+        + СОЗДАТЬ АЛЬБОМ
+      </button>
+      {rows.map((row) => (
+        <AlbumCard key={row.id} row={row} onChange={refresh} />
+      ))}
+    </div>
+  );
+}
+
+function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
+  const [draft, setDraft] = useState(row);
+  const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<string | null>(null);
+  const save = useSaver(onChange);
+  useEffect(() => setDraft(row), [row]);
+
+  const photos = useQuery({
+    queryKey: ["gallery-photos", row.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gallery_photos")
+        .select("id, storage_path, sort_order")
+        .eq("album_id", row.id)
+        .order("sort_order");
+      if (error) throw error;
+      const paths = (data ?? []).map((p) => p.storage_path);
+      const signed = await signPaths(paths);
+      return (data ?? []).map((p) => ({ ...p, url: signed[p.storage_path] ?? "" }));
+    },
+  });
+
+  async function upload(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setBusy(true);
+    const start = (photos.data?.at(-1)?.sort_order ?? 0) + 1;
+    let ok = 0;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]!;
+      setProgress(`${i + 1} / ${files.length}`);
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${row.id}/${crypto.randomUUID()}.${ext}`;
+      const up = await supabase.storage.from("gallery").upload(path, file, {
+        cacheControl: "31536000",
+        upsert: false,
+      });
+      if (up.error) {
+        toast.error(up.error.message);
+        continue;
+      }
+      const ins = await supabase.from("gallery_photos").insert({
+        album_id: row.id,
+        storage_path: path,
+        url: "",
+        sort_order: start + i,
+      });
+      if (ins.error) toast.error(ins.error.message);
+      else ok++;
+    }
+    setBusy(false);
+    setProgress(null);
+    if (ok > 0) toast.success(`Загружено фото: ${ok}`);
+    photos.refetch();
+    onChange();
+  }
+
+  async function removePhoto(id: string, path: string) {
+    await supabase.storage.from("gallery").remove([path]);
+    const { error } = await supabase.from("gallery_photos").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Фото удалено");
+      photos.refetch();
+      onChange();
+    }
+  }
+
+  async function removeAlbum() {
+    if (!confirm(`Удалить альбом «${row.title}» со всеми фото?`)) return;
+    const paths = (photos.data ?? []).map((p) => p.storage_path);
+    if (paths.length) await supabase.storage.from("gallery").remove(paths);
+    save(() => supabase.from("gallery_albums").delete().eq("id", row.id), "Альбом удалён");
+  }
+
+  return (
+    <div className="glass space-y-4 rounded-2xl p-5">
+      <div className="grid gap-3 sm:grid-cols-[2fr_1fr_auto]">
+        <label className="block">
+          <span className="text-[0.6rem] tracking-[0.2em] text-muted-foreground">НАЗВАНИЕ</span>
+          <input
+            className={inputCls}
+            value={draft.title}
+            onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+          />
+        </label>
+        <label className="block">
+          <span className="text-[0.6rem] tracking-[0.2em] text-muted-foreground">ДАТА</span>
+          <input
+            className={inputCls}
+            value={draft.date_label}
+            onChange={(e) => setDraft({ ...draft, date_label: e.target.value })}
+          />
+        </label>
+        <label className="block">
+          <span className="text-[0.6rem] tracking-[0.2em] text-muted-foreground">ПОРЯДОК</span>
+          <input
+            type="number"
+            className={`${inputCls} sm:w-24`}
+            value={draft.sort_order}
+            onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) })}
+          />
+        </label>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          className={btnCls}
+          onClick={() =>
+            save(
+              () =>
+                supabase
+                  .from("gallery_albums")
+                  .update({
+                    title: draft.title,
+                    date_label: draft.date_label,
+                    sort_order: draft.sort_order,
+                  })
+                  .eq("id", row.id),
+              "Сохранено",
+            )
+          }
+        >
+          СОХРАНИТЬ
+        </button>
+
+        <label className={`${ghostCls} cursor-pointer`}>
+          {busy ? `ЗАГРУЗКА ${progress ?? ""}` : "+ ДОБАВИТЬ ФОТО"}
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            disabled={busy}
+            className="hidden"
+            onChange={(e) => {
+              upload(e.target.files);
+              e.target.value = "";
+            }}
+          />
+        </label>
+
+        <button className={ghostCls} onClick={removeAlbum}>
+          УДАЛИТЬ АЛЬБОМ
+        </button>
+      </div>
+
+      {(photos.data?.length ?? 0) > 0 && (
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+          {photos.data!.map((p) => (
+            <div key={p.id} className="relative aspect-square overflow-hidden rounded-lg bg-secondary">
+              <img src={p.url} alt="" className="h-full w-full object-cover" loading="lazy" />
+              <button
+                onClick={() => removePhoto(p.id, p.storage_path)}
+                aria-label="Удалить фото"
+                className="absolute top-1 right-1 rounded-full bg-background/80 px-2 py-1 text-[0.6rem] text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
