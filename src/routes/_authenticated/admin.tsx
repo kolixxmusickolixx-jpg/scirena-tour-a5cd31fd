@@ -28,7 +28,7 @@ const btnCls =
 const ghostCls =
   "rounded-full border border-border px-5 py-2 text-[0.65rem] tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground";
 
-type Tab = "shows" | "content" | "faq" | "socials";
+type Tab = "shows" | "content" | "faq" | "socials" | "gallery";
 
 function AdminPage() {
   const navigate = useNavigate();
