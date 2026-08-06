@@ -151,6 +151,7 @@ function AdminPage() {
           {tab === "socials" && (
             <SocialsTab rows={socials.data ?? []} onChange={() => refresh("socials")} />
           )}
+          {tab === "gallery" && <GalleryTab />}
         </div>
       </div>
     </main>
