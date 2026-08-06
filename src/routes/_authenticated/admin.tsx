@@ -123,6 +123,7 @@ function AdminPage() {
               ["content", "ТЕКСТЫ"],
               ["faq", "FAQ"],
               ["socials", "ССЫЛКИ"],
+              ["gallery", "ГАЛЕРЕЯ"],
             ] as [Tab, string][]
           ).map(([id, label]) => (
             <button
