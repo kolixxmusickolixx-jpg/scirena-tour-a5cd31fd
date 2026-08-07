@@ -100,7 +100,7 @@ export function Lightbox({
             alt={`${title} — фото ${safeIndex + 1}`}
             drag={zoom ? true : "x"}
             dragElastic={zoom ? 0.05 : 0.18}
-            dragConstraints={zoom ? undefined : { left: 0, right: 0 }}
+            dragConstraints={zoom ? false : { left: 0, right: 0 }}
             onDoubleClick={() => setZoom((z) => !z)}
             onDragEnd={(_, info) => {
               if (zoom) return;
