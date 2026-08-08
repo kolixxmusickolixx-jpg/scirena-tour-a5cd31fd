@@ -293,7 +293,7 @@ function Cities({ data }: { data: SiteData }) {
   return (
     <section id="cities" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
       <div className="mx-auto max-w-7xl">
-        <SectionTitle kicker="ТУР 2026" title="ГОРОДА ТУРА" />
+        <SectionTitle kicker="ТУР 2027" title="ГОРОДА ТУРА" />
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {shows.map((s, i) => (
             <Reveal key={s.id} delay={(i % 3) * 0.08}>
