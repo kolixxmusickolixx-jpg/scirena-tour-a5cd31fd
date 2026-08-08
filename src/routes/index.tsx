@@ -452,7 +452,7 @@ function Footer({ data }: { data: SiteData }) {
             >
               ПОЛИТИКА КОНФИДЕНЦИАЛЬНОСТИ
             </a>
-            <p className="mt-3">© SCIRENA TOUR 2026</p>
+            <p className="mt-3">© SCIRENA TOUR 2027</p>
           </div>
         </div>
       </div>
