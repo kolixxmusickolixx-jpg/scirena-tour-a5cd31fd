@@ -17,16 +17,16 @@ const alt1 = { base: "IMG_20260804_232720_983" };
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SCIRENA — тур «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026 | Билеты" },
+      { title: "SCIRENA — тур «THE OCEAN TOUR» 2027 | Билеты" },
       {
         name: "description",
         content:
-          "Новый концертный тур SCIRENA «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026. Даты, города, площадки и билеты на концерты по всей России.",
+          "Новый концертный тур SCIRENA «THE OCEAN TOUR» 2027. Даты, города, площадки и билеты на концерты по всей России.",
       },
-      { property: "og:title", content: "SCIRENA — тур «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026 | Билеты" },
+      { property: "og:title", content: "SCIRENA — тур «THE OCEAN TOUR» 2027 | Билеты" },
       {
         property: "og:description",
-        content: "Новый концертный тур SCIRENA «УЕЗЖАЕМ ОСТАЁМСЯ?» 2026. Даты, города, площадки и билеты на концерты по всей России.",
+        content: "Новый концертный тур SCIRENA «THE OCEAN TOUR» 2027. Даты, города, площадки и билеты на концерты по всей России.",
       },
       { property: "og:type", content: "website" },
       { property: "og:image", content: hero.url },
