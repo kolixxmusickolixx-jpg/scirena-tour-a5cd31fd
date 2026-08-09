@@ -69,7 +69,7 @@ export function SupportWidget() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label="Техническая поддержка"
-        className="fixed bottom-5 right-5 z-[70] flex h-14 w-14 items-center justify-center rounded-full border border-border bg-primary text-primary-foreground shadow-[0_10px_40px_rgba(0,0,0,0.5)] transition-transform hover:scale-105 active:scale-95"
+        className="fixed bottom-5 right-5 z-[9999] flex h-14 w-14 items-center justify-center rounded-full border border-border bg-primary text-primary-foreground shadow-[0_10px_40px_rgba(0,0,0,0.5)] transition-transform hover:scale-105 active:scale-95"
       >
         {open ? <X className="h-5 w-5" /> : <MessageCircle className="h-6 w-6" />}
       </button>
@@ -81,7 +81,7 @@ export function SupportWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-x-3 bottom-24 z-[70] flex max-h-[70vh] flex-col overflow-hidden rounded-3xl border border-border bg-background shadow-[0_20px_70px_rgba(0,0,0,0.7)] backdrop-blur-2xl sm:inset-x-auto sm:right-5 sm:w-[380px]"
+            className="fixed inset-x-3 bottom-24 z-[9999] flex max-h-[70vh] flex-col overflow-hidden rounded-3xl border border-border bg-background shadow-[0_20px_70px_rgba(0,0,0,0.7)] backdrop-blur-2xl sm:inset-x-auto sm:right-5 sm:w-[380px]"
           >
             <header className="flex items-center gap-3 border-b border-border/60 px-4 py-3">
               {view !== "list" && saved.length > 0 && (
