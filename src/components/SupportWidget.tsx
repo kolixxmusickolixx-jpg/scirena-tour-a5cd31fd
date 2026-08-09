@@ -81,7 +81,7 @@ export function SupportWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            className="glass fixed inset-x-3 bottom-24 z-[70] flex max-h-[75vh] flex-col overflow-hidden rounded-3xl border border-border sm:inset-x-auto sm:right-5 sm:w-[380px]"
+            className="fixed inset-x-3 bottom-24 z-[70] flex max-h-[70vh] flex-col overflow-hidden rounded-3xl border border-border bg-background/95 shadow-[0_20px_70px_rgba(0,0,0,0.7)] backdrop-blur-2xl sm:inset-x-auto sm:right-5 sm:w-[380px]"
           >
             <header className="flex items-center gap-3 border-b border-border/60 px-4 py-3">
               {view !== "list" && saved.length > 0 && (
