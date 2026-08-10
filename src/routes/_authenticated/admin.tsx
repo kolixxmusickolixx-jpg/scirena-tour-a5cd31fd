@@ -18,6 +18,8 @@ import {
   Inbox,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { checkAdminTwoFactor, revokeAdminTwoFactor } from "@/lib/twofa.functions";
+
 import { signPaths, galleryKeys } from "@/lib/gallery";
 import { SupportTab } from "@/components/admin/SupportTab";
 
@@ -66,11 +68,35 @@ function AdminPage() {
   const qc = useQueryClient();
   const [tab, setTab] = useState<Tab>("shows");
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [twoFactorOk, setTwoFactorOk] = useState<boolean | null>(null);
   const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
-    supabase.rpc("claim_admin").then(({ data }) => setIsAdmin(Boolean(data)));
-  }, []);
+    let alive = true;
+    checkAdminTwoFactor()
+      .then(async ({ verified }) => {
+        if (!alive) return;
+        if (!verified) {
+          setTwoFactorOk(false);
+          await supabase.auth.signOut();
+          navigate({ to: "/auth", replace: true });
+          return;
+        }
+        setTwoFactorOk(true);
+        const { data } = await supabase.rpc("claim_admin");
+        if (alive) setIsAdmin(Boolean(data));
+      })
+      .catch(async () => {
+        if (!alive) return;
+        setTwoFactorOk(false);
+        await supabase.auth.signOut();
+        navigate({ to: "/auth", replace: true });
+      });
+    return () => {
+      alive = false;
+    };
+  }, [navigate]);
+
 
   const shows = useQuery({
     queryKey: ["admin", "shows"],
@@ -113,11 +139,25 @@ function AdminPage() {
   async function signOut() {
     await qc.cancelQueries();
     qc.clear();
+    try {
+      await revokeAdminTwoFactor();
+    } catch {
+      /* session may already be gone */
+    }
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   }
 
+  if (twoFactorOk !== true) {
+    return (
+      <main className="flex min-h-screen items-center justify-center px-5 text-center">
+        <p className="text-[0.65rem] tracking-[0.3em] text-muted-foreground">ПРОВЕРКА ДОСТУПА…</p>
+      </main>
+    );
+  }
+
   if (isAdmin === false) {
+
     return (
       <main className="flex min-h-screen items-center justify-center px-5 text-center">
         <div className="glass max-w-md rounded-3xl p-8">
