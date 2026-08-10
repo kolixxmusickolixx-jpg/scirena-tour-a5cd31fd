@@ -18,6 +18,8 @@ import {
   Inbox,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { checkAdminTwoFactor, revokeAdminTwoFactor } from "@/lib/twofa.functions";
+
 import { signPaths, galleryKeys } from "@/lib/gallery";
 import { SupportTab } from "@/components/admin/SupportTab";
 
