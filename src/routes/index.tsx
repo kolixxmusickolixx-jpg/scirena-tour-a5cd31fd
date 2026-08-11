@@ -9,9 +9,9 @@ import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { siteQuery } from "@/lib/site-query";
 import type { SiteData } from "@/lib/site.functions";
+import quoteAsset from "@/assets/quote.jpg.asset.json";
 const hero = { base: "IMG_20260804_232616_195", url: "/img/IMG_20260804_232616_195-1600.webp" };
 const portrait = { base: "IMG_20260804_232611_238" };
-const quoteImg = { base: "IMG_20260804_232724_950" };
 const alt1 = { base: "IMG_20260804_232720_983" };
 
 export const Route = createFileRoute("/")({
@@ -342,10 +342,12 @@ function QuoteScreen({ data }: { data: SiteData }) {
 
   return (
     <section ref={ref} className="relative h-[70svh] overflow-hidden sm:h-[100svh]">
-      <ResponsiveImage
-        base={quoteImg.base}
+      <motion.img
+        src={quoteAsset.url}
         alt="SCIRENA на концерте тура"
         sizes="100vw"
+        loading="lazy"
+        decoding="async"
         style={
           isMobile
             ? { willChange: "auto" }
