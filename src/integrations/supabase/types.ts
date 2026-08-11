@@ -364,6 +364,59 @@ export type Database = {
         }
         Returns: boolean
       }
+      support_create_ticket: {
+        Args: { p_email: string; p_message: string; p_name: string }
+        Returns: Json
+      }
+      support_find_tickets: {
+        Args: { p_code: string; p_email: string }
+        Returns: Json
+      }
+      support_get_thread: {
+        Args: { p_code: string; p_ticket_id: string }
+        Returns: Json
+      }
+      support_send_message: {
+        Args: { p_body: string; p_code: string; p_ticket_id: string }
+        Returns: Json
+      }
+      twofa_claim_grant: {
+        Args: { p_grant_token: string; p_ttl_hours: number }
+        Returns: Json
+      }
+      twofa_create_challenge: {
+        Args: {
+          p_code_hash: string
+          p_email: string
+          p_expires_at: string
+          p_id: string
+          p_max_per_hour: number
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      twofa_is_verified: { Args: never; Returns: boolean }
+      twofa_resend: {
+        Args: {
+          p_code_hash: string
+          p_cooldown_sec: number
+          p_expires_at: string
+          p_id: string
+          p_max_sends: number
+        }
+        Returns: Json
+      }
+      twofa_revoke: { Args: never; Returns: undefined }
+      twofa_verify: {
+        Args: {
+          p_code_hash: string
+          p_grant_token: string
+          p_grant_ttl_sec: number
+          p_id: string
+          p_max_attempts: number
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "user"
