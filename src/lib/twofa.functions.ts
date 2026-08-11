@@ -57,24 +57,33 @@ export const claimAdminGrant = createServerFn({ method: "POST" })
     return { grantToken };
   })
   .handler(async ({ data, context }) => {
-    const { claimGrant } = await import("./twofa.server");
-    return claimGrant(context.userId, data.grantToken, SESSION_TTL_HOURS);
+    const { data: res, error } = await (context.supabase as any).rpc("twofa_claim_grant", {
+      p_grant_token: data.grantToken,
+      p_ttl_hours: SESSION_TTL_HOURS,
+    });
+    if (error) throw new Error("Не удалось подтвердить вход");
+    if (!res?.ok) {
+      throw new Error(
+        res?.error === "expired" ? "Подтверждение истекло. Войдите заново." : "Подтверждение не найдено",
+      );
+    }
+    return { ok: true };
   });
 
 export const checkAdminTwoFactor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { isVerified } = await import("./twofa.server");
-    return { verified: await isVerified(context.userId) };
+    const { data } = await (context.supabase as any).rpc("twofa_is_verified");
+    return { verified: data === true };
   });
 
 export const revokeAdminTwoFactor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { revokeVerifications } = await import("./twofa.server");
-    await revokeVerifications(context.userId);
+    await (context.supabase as any).rpc("twofa_revoke");
     return { ok: true };
   });
+
 
 export const twoFactorConfig = {
   CODE_TTL_MIN,

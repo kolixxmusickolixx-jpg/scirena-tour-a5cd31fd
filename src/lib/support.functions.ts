@@ -21,6 +21,16 @@ export type SupportMessage = {
 const clean = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
 const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
+async function rpc(fn: string, args: Record<string, unknown>) {
+  const { publicServerClient } = await import("./db.server");
+  const { data, error } = await publicServerClient().rpc(fn, args);
+  if (error) {
+    console.error(`[support] ${fn} failed: ${error.message}`);
+    throw new Error("Сервис поддержки временно недоступен");
+  }
+  return (data ?? {}) as Record<string, any>;
+}
+
 export const createSupportTicket = createServerFn({ method: "POST" })
   .inputValidator((input: { name: string; email: string; message: string }) => {
     const name = clean(input?.name, 80);
@@ -32,43 +42,14 @@ export const createSupportTicket = createServerFn({ method: "POST" })
     return { name, email, message };
   })
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const accessCode = Array.from({ length: 6 }, () =>
-      "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".charAt(Math.floor(Math.random() * 32)),
-    ).join("");
-
-    const { data: ticket, error } = await supabaseAdmin
-      .from("support_tickets")
-      .insert({
-        name: data.name,
-        email: data.email,
-        subject: data.message.slice(0, 90),
-        status: "new",
-        access_code: accessCode,
-      })
-      .select("id, name, email, subject, status, created_at, updated_at")
-      .single();
-    if (error || !ticket) throw new Error("Не удалось создать обращение");
-
-    const { error: msgError } = await supabaseAdmin
-      .from("support_messages")
-      .insert({ ticket_id: ticket.id, sender: "client", body: data.message });
-    if (msgError) throw new Error("Не удалось сохранить сообщение");
-
-    return { ticket: ticket as SupportTicket, accessCode };
+    const res = await rpc("support_create_ticket", {
+      p_name: data.name,
+      p_email: data.email,
+      p_message: data.message,
+    });
+    if (!res["ok"]) throw new Error("Не удалось создать обращение");
+    return { ticket: res["ticket"] as SupportTicket, accessCode: res["accessCode"] as string };
   });
-
-async function loadTicket(ticketId: string, accessCode: string) {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: ticket } = await supabaseAdmin
-    .from("support_tickets")
-    .select("id, name, email, subject, status, access_code, created_at, updated_at")
-    .eq("id", ticketId)
-    .maybeSingle();
-  if (!ticket || ticket.access_code !== accessCode) throw new Error("Обращение не найдено");
-  const { access_code: _code, ...safe } = ticket;
-  return { supabaseAdmin, ticket: safe as SupportTicket };
-}
 
 export const getSupportThread = createServerFn({ method: "POST" })
   .inputValidator((input: { ticketId: string; accessCode: string }) => ({
@@ -76,13 +57,15 @@ export const getSupportThread = createServerFn({ method: "POST" })
     accessCode: clean(input?.accessCode, 12).toUpperCase(),
   }))
   .handler(async ({ data }) => {
-    const { supabaseAdmin, ticket } = await loadTicket(data.ticketId, data.accessCode);
-    const { data: messages } = await supabaseAdmin
-      .from("support_messages")
-      .select("id, ticket_id, sender, body, created_at")
-      .eq("ticket_id", ticket.id)
-      .order("created_at", { ascending: true });
-    return { ticket, messages: (messages ?? []) as SupportMessage[] };
+    const res = await rpc("support_get_thread", {
+      p_ticket_id: data.ticketId,
+      p_code: data.accessCode,
+    });
+    if (!res["ok"]) throw new Error("Обращение не найдено");
+    return {
+      ticket: res["ticket"] as SupportTicket,
+      messages: (res["messages"] ?? []) as SupportMessage[],
+    };
   });
 
 export const sendSupportMessage = createServerFn({ method: "POST" })
@@ -96,16 +79,14 @@ export const sendSupportMessage = createServerFn({ method: "POST" })
     };
   })
   .handler(async ({ data }) => {
-    const { supabaseAdmin, ticket } = await loadTicket(data.ticketId, data.accessCode);
-    if (ticket.status === "closed") throw new Error("Обращение закрыто");
-    const { error } = await supabaseAdmin
-      .from("support_messages")
-      .insert({ ticket_id: ticket.id, sender: "client", body: data.body });
-    if (error) throw new Error("Не удалось отправить сообщение");
-    await supabaseAdmin
-      .from("support_tickets")
-      .update({ updated_at: new Date().toISOString() })
-      .eq("id", ticket.id);
+    const res = await rpc("support_send_message", {
+      p_ticket_id: data.ticketId,
+      p_code: data.accessCode,
+      p_body: data.body,
+    });
+    if (!res["ok"]) {
+      throw new Error(res["error"] === "closed" ? "Обращение закрыто" : "Не удалось отправить сообщение");
+    }
     return { ok: true };
   });
 
@@ -118,17 +99,10 @@ export const findSupportTickets = createServerFn({ method: "POST" })
     return { email, accessCode };
   })
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows } = await supabaseAdmin
-      .from("support_tickets")
-      .select("id, name, email, subject, status, access_code, created_at, updated_at")
-      .eq("email", data.email)
-      .order("created_at", { ascending: false });
-
-    const owned = (rows ?? []).filter((r) => r.access_code === data.accessCode);
-    if (owned.length === 0) throw new Error("Обращения с таким email и кодом не найдены");
-    return owned.map(({ access_code, ...rest }) => ({
-      ...(rest as SupportTicket),
-      accessCode: access_code as string,
-    }));
+    const res = await rpc("support_find_tickets", {
+      p_email: data.email,
+      p_code: data.accessCode,
+    });
+    if (!res["ok"]) throw new Error("Обращения с таким email и кодом не найдены");
+    return (res["tickets"] ?? []) as (SupportTicket & { accessCode: string })[];
   });
