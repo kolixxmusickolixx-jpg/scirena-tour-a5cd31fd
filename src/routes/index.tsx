@@ -342,10 +342,12 @@ function QuoteScreen({ data }: { data: SiteData }) {
 
   return (
     <section ref={ref} className="relative h-[70svh] overflow-hidden sm:h-[100svh]">
-      <ResponsiveImage
-        base={quoteImg.base}
+      <motion.img
+        src={quoteAsset.url}
         alt="SCIRENA на концерте тура"
         sizes="100vw"
+        loading="lazy"
+        decoding="async"
         style={
           isMobile
             ? { willChange: "auto" }
