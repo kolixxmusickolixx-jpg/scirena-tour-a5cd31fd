@@ -9,7 +9,11 @@ import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { siteQuery } from "@/lib/site-query";
 import type { SiteData } from "@/lib/site.functions";
-import quoteAsset from "@/assets/quote.jpg.asset.json";
+const quoteImg = {
+  src: "/img/quote-1600.webp",
+  srcSet:
+    "/img/quote-640.webp 640w, /img/quote-1080.webp 1080w, /img/quote-1600.webp 1600w",
+};
 const hero = { base: "IMG_20260804_232616_195", url: "/img/IMG_20260804_232616_195-1600.webp" };
 const portrait = { base: "IMG_20260804_232611_238" };
 const alt1 = { base: "IMG_20260804_232720_983" };
