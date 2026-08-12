@@ -225,13 +225,37 @@ function SectionTitle({ kicker, title }: { kicker: string; title: string }) {
   );
 }
 
+function NoAnnouncements({ note }: { note: string }) {
+  return (
+    <Reveal>
+      <div className="glass mt-14 flex flex-col items-center rounded-2xl px-6 py-14 text-center sm:py-20">
+        <span className="text-[0.6rem] tracking-[0.4em] text-muted-foreground">SCIRENA</span>
+        <p className="font-display mt-4 text-2xl font-bold tracking-tight sm:text-3xl">
+          АНОНСОВ ПОКА НЕТ
+        </p>
+        <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">{note}</p>
+      </div>
+    </Reveal>
+  );
+}
+
 function Upcoming({ data }: { data: SiteData }) {
   const shows = data.shows;
+  if (shows.length === 0)
+    return (
+      <section id="shows" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
+        <div className="mx-auto max-w-7xl">
+          <SectionTitle kicker="РАСПИСАНИЕ" title="БЛИЖАЙШИЕ КОНЦЕРТЫ" />
+          <NoAnnouncements note="Новые даты появятся здесь сразу после официального анонса тура." />
+        </div>
+      </section>
+    );
   return (
     <section id="shows" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
       <div className="mx-auto max-w-7xl">
         <SectionTitle kicker="РАСПИСАНИЕ" title="БЛИЖАЙШИЕ КОНЦЕРТЫ" />
         <div className="mt-14 grid gap-4 md:grid-cols-2">
+
           {shows.slice(0, 4).map((s, i) => (
             <Reveal key={s.id} delay={i * 0.08}>
               <motion.article
