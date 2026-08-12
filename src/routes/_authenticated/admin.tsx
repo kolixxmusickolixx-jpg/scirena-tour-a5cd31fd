@@ -780,23 +780,49 @@ function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
 
   const photoList = photos.data ?? [];
 
-  async function upload(files: FileList | null) {
+  function addToQueue(files: FileList | null) {
     if (!files || files.length === 0) return;
+    const picked = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    if (picked.length === 0) {
+      toast.error("Выберите изображения");
+      return;
+    }
+    setQueue((q) => [...q, ...picked.map((file) => ({ file, url: URL.createObjectURL(file) }))]);
+  }
+
+  function removeFromQueue(index: number) {
+    setQueue((q) => {
+      const item = q[index];
+      if (item) URL.revokeObjectURL(item.url);
+      return q.filter((_, i) => i !== index);
+    });
+  }
+
+  function clearQueue() {
+    setQueue((q) => {
+      q.forEach((i) => URL.revokeObjectURL(i.url));
+      return [];
+    });
+  }
+
+  async function uploadQueue() {
+    if (queue.length === 0) return;
     setBusy(true);
     const start = (photoList.at(-1)?.sort_order ?? 0) + 1;
     let ok = 0;
-    for (let i = 0; i < files.length; i++) {
-      const file = files.item(i);
-      if (!file) continue;
-      setProgress(`${i + 1} / ${files.length}`);
-      const ext = file.name.split(".").pop() || "jpg";
+    const failed: { file: File; url: string }[] = [];
+    for (let i = 0; i < queue.length; i++) {
+      const item = queue[i];
+      setProgress(`${i + 1} / ${queue.length}`);
+      const ext = item.file.name.split(".").pop() || "jpg";
       const path = `${row.id}/${crypto.randomUUID()}.${ext}`;
-      const up = await supabase.storage.from("gallery").upload(path, file, {
+      const up = await supabase.storage.from("gallery").upload(path, item.file, {
         cacheControl: "31536000",
         upsert: false,
       });
       if (up.error) {
-        toast.error(up.error.message);
+        toast.error(`${item.file.name}: ${up.error.message}`);
+        failed.push(item);
         continue;
       }
       const ins = await supabase.from("gallery_photos").insert({
@@ -805,15 +831,22 @@ function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
         url: "",
         sort_order: start + i,
       });
-      if (ins.error) toast.error(ins.error.message);
-      else ok++;
+      if (ins.error) {
+        toast.error(`${item.file.name}: ${ins.error.message}`);
+        failed.push(item);
+      } else {
+        URL.revokeObjectURL(item.url);
+        ok++;
+      }
     }
     setBusy(false);
     setProgress(null);
+    setQueue(failed);
     if (ok > 0) toast.success(`Загружено фото: ${ok}`);
     photos.refetch();
     onChange();
   }
+
 
   async function removePhoto(id: string, path: string) {
     await supabase.storage.from("gallery").remove([path]);
