@@ -1,6 +1,6 @@
 import { memo } from "react";
-import { Reveal } from "@/components/Reveal";
 import type { GalleryPhoto } from "@/lib/gallery";
+
 
 function PhotoGridBase({
   photos,
