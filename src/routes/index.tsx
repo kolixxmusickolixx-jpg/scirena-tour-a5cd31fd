@@ -347,7 +347,8 @@ function QuoteScreen({ data }: { data: SiteData }) {
   return (
     <section ref={ref} className="relative h-[70svh] overflow-hidden sm:h-[100svh]">
       <motion.img
-        src={quoteAsset.url}
+        src={quoteImg.src}
+        srcSet={quoteImg.srcSet}
         alt="SCIRENA на концерте тура"
         sizes="100vw"
         loading="lazy"
@@ -357,10 +358,10 @@ function QuoteScreen({ data }: { data: SiteData }) {
             ? { willChange: "auto" }
             : { y, scale: 1.25, willChange: "transform", backfaceVisibility: "hidden" }
         }
-        className="absolute inset-0 h-full w-full object-cover opacity-60 transform-gpu"
+        className="absolute inset-0 h-full w-full object-cover opacity-95 transform-gpu"
       />
 
-      <div className="veil absolute inset-0" />
+      <div className="veil absolute inset-0 opacity-50" />
       <div className="relative z-10 flex h-full items-center justify-center px-6">
         <Reveal>
           <p className="font-display max-w-4xl text-center text-xl leading-[1.3] font-semibold text-balance-lux sm:text-4xl sm:leading-[1.25] lg:text-5xl">
