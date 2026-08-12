@@ -9,7 +9,11 @@ import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { siteQuery } from "@/lib/site-query";
 import type { SiteData } from "@/lib/site.functions";
-import quoteAsset from "@/assets/quote.jpg.asset.json";
+const quoteImg = {
+  src: "/img/quote-1600.webp",
+  srcSet:
+    "/img/quote-640.webp 640w, /img/quote-1080.webp 1080w, /img/quote-1600.webp 1600w",
+};
 const hero = { base: "IMG_20260804_232616_195", url: "/img/IMG_20260804_232616_195-1600.webp" };
 const portrait = { base: "IMG_20260804_232611_238" };
 const alt1 = { base: "IMG_20260804_232720_983" };
@@ -221,13 +225,37 @@ function SectionTitle({ kicker, title }: { kicker: string; title: string }) {
   );
 }
 
+function NoAnnouncements({ note }: { note: string }) {
+  return (
+    <Reveal>
+      <div className="glass mt-14 flex flex-col items-center rounded-2xl px-6 py-14 text-center sm:py-20">
+        <span className="text-[0.6rem] tracking-[0.4em] text-muted-foreground">SCIRENA</span>
+        <p className="font-display mt-4 text-2xl font-bold tracking-tight sm:text-3xl">
+          АНОНСОВ ПОКА НЕТ
+        </p>
+        <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">{note}</p>
+      </div>
+    </Reveal>
+  );
+}
+
 function Upcoming({ data }: { data: SiteData }) {
   const shows = data.shows;
+  if (shows.length === 0)
+    return (
+      <section id="shows" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
+        <div className="mx-auto max-w-7xl">
+          <SectionTitle kicker="РАСПИСАНИЕ" title="БЛИЖАЙШИЕ КОНЦЕРТЫ" />
+          <NoAnnouncements note="Новые даты появятся здесь сразу после официального анонса тура." />
+        </div>
+      </section>
+    );
   return (
     <section id="shows" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
       <div className="mx-auto max-w-7xl">
         <SectionTitle kicker="РАСПИСАНИЕ" title="БЛИЖАЙШИЕ КОНЦЕРТЫ" />
         <div className="mt-14 grid gap-4 md:grid-cols-2">
+
           {shows.slice(0, 4).map((s, i) => (
             <Reveal key={s.id} delay={i * 0.08}>
               <motion.article
@@ -290,11 +318,21 @@ function Bio({ data }: { data: SiteData }) {
 
 function Cities({ data }: { data: SiteData }) {
   const shows = data.shows;
+  if (shows.length === 0)
+    return (
+      <section id="cities" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
+        <div className="mx-auto max-w-7xl">
+          <SectionTitle kicker="ТУР 2027" title="ГОРОДА ТУРА" />
+          <NoAnnouncements note="Города тура будут опубликованы здесь после анонса. Следите за обновлениями." />
+        </div>
+      </section>
+    );
   return (
     <section id="cities" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
       <div className="mx-auto max-w-7xl">
         <SectionTitle kicker="ТУР 2027" title="ГОРОДА ТУРА" />
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
           {shows.map((s, i) => (
             <Reveal key={s.id} delay={(i % 3) * 0.08}>
               <motion.article
@@ -343,7 +381,8 @@ function QuoteScreen({ data }: { data: SiteData }) {
   return (
     <section ref={ref} className="relative h-[70svh] overflow-hidden sm:h-[100svh]">
       <motion.img
-        src={quoteAsset.url}
+        src={quoteImg.src}
+        srcSet={quoteImg.srcSet}
         alt="SCIRENA на концерте тура"
         sizes="100vw"
         loading="lazy"
@@ -353,10 +392,10 @@ function QuoteScreen({ data }: { data: SiteData }) {
             ? { willChange: "auto" }
             : { y, scale: 1.25, willChange: "transform", backfaceVisibility: "hidden" }
         }
-        className="absolute inset-0 h-full w-full object-cover opacity-60 transform-gpu"
+        className="absolute inset-0 h-full w-full object-cover opacity-95 transform-gpu"
       />
 
-      <div className="veil absolute inset-0" />
+      <div className="veil absolute inset-0 opacity-50" />
       <div className="relative z-10 flex h-full items-center justify-center px-6">
         <Reveal>
           <p className="font-display max-w-4xl text-center text-xl leading-[1.3] font-semibold text-balance-lux sm:text-4xl sm:leading-[1.25] lg:text-5xl">

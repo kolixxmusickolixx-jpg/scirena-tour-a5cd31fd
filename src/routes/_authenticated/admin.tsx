@@ -760,6 +760,7 @@ function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
   const [draft, setDraft] = useState(row);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
+  const [queue, setQueue] = useState<{ file: File; url: string }[]>([]);
   const save = useSaver(onChange);
   useEffect(() => setDraft(row), [row]);
 
@@ -780,23 +781,50 @@ function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
 
   const photoList = photos.data ?? [];
 
-  async function upload(files: FileList | null) {
+  function addToQueue(files: FileList | null) {
     if (!files || files.length === 0) return;
+    const picked = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    if (picked.length === 0) {
+      toast.error("Выберите изображения");
+      return;
+    }
+    setQueue((q) => [...q, ...picked.map((file) => ({ file, url: URL.createObjectURL(file) }))]);
+  }
+
+  function removeFromQueue(index: number) {
+    setQueue((q) => {
+      const item = q[index];
+      if (item) URL.revokeObjectURL(item.url);
+      return q.filter((_, i) => i !== index);
+    });
+  }
+
+  function clearQueue() {
+    setQueue((q) => {
+      q.forEach((i) => URL.revokeObjectURL(i.url));
+      return [];
+    });
+  }
+
+  async function uploadQueue() {
+    if (queue.length === 0) return;
     setBusy(true);
     const start = (photoList.at(-1)?.sort_order ?? 0) + 1;
     let ok = 0;
-    for (let i = 0; i < files.length; i++) {
-      const file = files.item(i);
-      if (!file) continue;
-      setProgress(`${i + 1} / ${files.length}`);
-      const ext = file.name.split(".").pop() || "jpg";
+    const failed: { file: File; url: string }[] = [];
+    for (let i = 0; i < queue.length; i++) {
+      const item = queue[i];
+      if (!item) continue;
+      setProgress(`${i + 1} / ${queue.length}`);
+      const ext = item.file.name.split(".").pop() || "jpg";
       const path = `${row.id}/${crypto.randomUUID()}.${ext}`;
-      const up = await supabase.storage.from("gallery").upload(path, file, {
+      const up = await supabase.storage.from("gallery").upload(path, item.file, {
         cacheControl: "31536000",
         upsert: false,
       });
       if (up.error) {
-        toast.error(up.error.message);
+        toast.error(`${item.file.name}: ${up.error.message}`);
+        failed.push(item);
         continue;
       }
       const ins = await supabase.from("gallery_photos").insert({
@@ -805,15 +833,22 @@ function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
         url: "",
         sort_order: start + i,
       });
-      if (ins.error) toast.error(ins.error.message);
-      else ok++;
+      if (ins.error) {
+        toast.error(`${item.file.name}: ${ins.error.message}`);
+        failed.push(item);
+      } else {
+        URL.revokeObjectURL(item.url);
+        ok++;
+      }
     }
     setBusy(false);
     setProgress(null);
+    setQueue(failed);
     if (ok > 0) toast.success(`Загружено фото: ${ok}`);
     photos.refetch();
     onChange();
   }
+
 
   async function removePhoto(id: string, path: string) {
     await supabase.storage.from("gallery").remove([path]);
@@ -893,7 +928,7 @@ function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
 
         <label className={`${ghostCls} cursor-pointer`}>
           <Upload size={14} />
-          {busy ? `ЗАГРУЗКА ${progress ?? ""}` : "ДОБАВИТЬ ФОТО"}
+          {busy ? `ЗАГРУЗКА ${progress ?? ""}` : "ВЫБРАТЬ ФОТО"}
           <input
             type="file"
             accept="image/*"
@@ -901,7 +936,7 @@ function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
             disabled={busy}
             className="hidden"
             onChange={(e) => {
-              upload(e.target.files);
+              addToQueue(e.target.files);
               e.target.value = "";
             }}
           />
@@ -911,6 +946,55 @@ function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
           <Trash2 size={14} /> УДАЛИТЬ АЛЬБОМ
         </button>
       </div>
+
+      {queue.length > 0 && (
+        <div className="space-y-3 rounded-2xl border border-border p-3 sm:p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-[0.6rem] tracking-[0.2em] text-muted-foreground">
+              К ЗАГРУЗКЕ: {queue.length}
+              {busy && progress ? ` · ${progress}` : ""}
+            </span>
+            <div className="flex flex-wrap gap-2">
+              <button className={btnCls} disabled={busy} onClick={uploadQueue}>
+                <Upload size={14} /> {busy ? `ЗАГРУЗКА ${progress ?? ""}` : "ЗАГРУЗИТЬ ВСЁ"}
+              </button>
+              <button className={ghostCls} disabled={busy} onClick={clearQueue}>
+                ОЧИСТИТЬ
+              </button>
+            </div>
+          </div>
+          {busy && (
+            <div className="h-1 w-full overflow-hidden rounded-full bg-secondary">
+              <div
+                className="h-full bg-primary transition-all duration-300"
+                style={{
+                  width: `${((Number(progress?.split("/")[0] ?? 0) / queue.length) * 100).toFixed(0)}%`,
+                }}
+              />
+            </div>
+          )}
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+            {queue.map((item, i) => (
+              <div
+                key={item.url}
+                className="relative aspect-square overflow-hidden rounded-xl bg-secondary"
+              >
+                <img src={item.url} alt="" className="h-full w-full object-cover" />
+                {!busy && (
+                  <button
+                    onClick={() => removeFromQueue(i)}
+                    aria-label="Убрать из очереди"
+                    className="absolute top-1 right-1 rounded-full bg-background/80 p-1.5 text-foreground transition-colors hover:bg-destructive"
+                  >
+                    <Trash2 size={11} />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
 
       {photoList.length > 0 && (
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
