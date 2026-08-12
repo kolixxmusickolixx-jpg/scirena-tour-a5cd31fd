@@ -814,7 +814,7 @@ function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
     const failed: { file: File; url: string }[] = [];
     for (let i = 0; i < queue.length; i++) {
       const item = queue[i];
-      setProgress(`${i + 1} / ${queue.length}`);
+      if (!item) continue;
       const ext = item.file.name.split(".").pop() || "jpg";
       const path = `${row.id}/${crypto.randomUUID()}.${ext}`;
       const up = await supabase.storage.from("gallery").upload(path, item.file, {
