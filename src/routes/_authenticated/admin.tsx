@@ -760,6 +760,7 @@ function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
   const [draft, setDraft] = useState(row);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
+  const [queue, setQueue] = useState<{ file: File; url: string }[]>([]);
   const save = useSaver(onChange);
   useEffect(() => setDraft(row), [row]);
 
