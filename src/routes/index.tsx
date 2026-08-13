@@ -90,7 +90,9 @@ function Index() {
       <Cities data={data} />
       <QuoteScreen data={data} />
       <Faq data={data} />
+      <Releases />
       <Gallery />
+
       <Footer data={data} />
 
     </main>
