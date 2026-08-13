@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { Reveal } from "@/components/Reveal";
 import { ResponsiveImage } from "@/components/ResponsiveImage";
 import { Gallery } from "@/components/Gallery";
+import { Releases } from "@/components/Releases";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 import { useSuspenseQuery } from "@tanstack/react-query";
