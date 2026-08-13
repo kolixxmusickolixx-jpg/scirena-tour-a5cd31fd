@@ -116,7 +116,9 @@ function Nav() {
           <a className="transition-colors hover:text-foreground" href="#bio">БИОГРАФИЯ</a>
           <a className="transition-colors hover:text-foreground" href="#cities">ГОРОДА</a>
           <a className="transition-colors hover:text-foreground" href="#faq">FAQ</a>
+          <a className="transition-colors hover:text-foreground" href="#releases">РЕЛИЗЫ</a>
           <a className="transition-colors hover:text-foreground" href="/gallery">ГАЛЕРЕЯ</a>
+
         </nav>
         <a
           href="#cities"
