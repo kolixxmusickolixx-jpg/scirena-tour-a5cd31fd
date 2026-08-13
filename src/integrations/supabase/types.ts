@@ -181,6 +181,51 @@ export type Database = {
           },
         ]
       }
+      releases: {
+        Row: {
+          apple_url: string | null
+          cover_path: string | null
+          created_at: string
+          id: string
+          published: boolean
+          release_type: string
+          sort_order: number
+          spotify_url: string | null
+          title: string
+          updated_at: string
+          vk_url: string | null
+          yandex_url: string | null
+        }
+        Insert: {
+          apple_url?: string | null
+          cover_path?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          release_type?: string
+          sort_order?: number
+          spotify_url?: string | null
+          title?: string
+          updated_at?: string
+          vk_url?: string | null
+          yandex_url?: string | null
+        }
+        Update: {
+          apple_url?: string | null
+          cover_path?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          release_type?: string
+          sort_order?: number
+          spotify_url?: string | null
+          title?: string
+          updated_at?: string
+          vk_url?: string | null
+          yandex_url?: string | null
+        }
+        Relationships: []
+      }
       shows: {
         Row: {
           city: string

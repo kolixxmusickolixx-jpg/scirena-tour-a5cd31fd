@@ -16,12 +16,14 @@ import {
   Upload,
   Menu,
   Inbox,
+  Disc3,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminTwoFactor, revokeAdminTwoFactor } from "@/lib/twofa.functions";
 
 import { signPaths, galleryKeys } from "@/lib/gallery";
 import { SupportTab } from "@/components/admin/SupportTab";
+import { ReleasesTab } from "@/components/admin/ReleasesTab";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -52,13 +54,14 @@ const ghostCls =
   "inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-[0.65rem] tracking-[0.18em] text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground";
 const cardCls = "glass rounded-2xl p-5 sm:p-6";
 
-type Tab = "shows" | "content" | "faq" | "socials" | "gallery" | "support";
+type Tab = "shows" | "content" | "faq" | "socials" | "releases" | "gallery" | "support";
 
 const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[] = [
   { id: "shows", label: "Концерты", icon: CalendarDays, hint: "Города, площадки и билеты" },
   { id: "content", label: "Тексты", icon: Type, hint: "Заголовки, биография, цитата" },
   { id: "faq", label: "FAQ", icon: HelpCircle, hint: "Вопросы и ответы" },
   { id: "socials", label: "Ссылки", icon: Link2, hint: "Соцсети в подвале" },
+  { id: "releases", label: "Релизы", icon: Disc3, hint: "Синглы и альбомы" },
   { id: "gallery", label: "Галерея", icon: Images, hint: "Альбомы и фотографии" },
   { id: "support", label: "Обращения", icon: Inbox, hint: "Переписка с клиентами" },
 ];
@@ -179,6 +182,7 @@ function AdminPage() {
     content: content.data?.length ?? null,
     faq: faq.data?.length ?? null,
     socials: socials.data?.length ?? null,
+    releases: null,
     gallery: null,
     support: null,
   };
@@ -276,6 +280,7 @@ function AdminPage() {
             {tab === "socials" && (
               <SocialsTab rows={socials.data ?? []} onChange={() => refresh("socials")} />
             )}
+            {tab === "releases" && <ReleasesTab />}
             {tab === "gallery" && <GalleryTab />}
             {tab === "support" && <SupportTab />}
           </div>

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { Reveal } from "@/components/Reveal";
 import { ResponsiveImage } from "@/components/ResponsiveImage";
 import { Gallery } from "@/components/Gallery";
+import { Releases } from "@/components/Releases";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -89,7 +90,9 @@ function Index() {
       <Cities data={data} />
       <QuoteScreen data={data} />
       <Faq data={data} />
+      <Releases />
       <Gallery />
+
       <Footer data={data} />
 
     </main>
@@ -113,7 +116,9 @@ function Nav() {
           <a className="transition-colors hover:text-foreground" href="#bio">БИОГРАФИЯ</a>
           <a className="transition-colors hover:text-foreground" href="#cities">ГОРОДА</a>
           <a className="transition-colors hover:text-foreground" href="#faq">FAQ</a>
+          <a className="transition-colors hover:text-foreground" href="#releases">РЕЛИЗЫ</a>
           <a className="transition-colors hover:text-foreground" href="/gallery">ГАЛЕРЕЯ</a>
+
         </nav>
         <a
           href="#cities"
