@@ -85,9 +85,8 @@ function Index() {
     <main className="relative">
       <Nav />
       <Hero heroRef={heroRef} scale={scale} y={y} fade={fade} data={data} />
-      <Upcoming data={data} />
-      <Bio data={data} />
       <Cities data={data} />
+      <Bio data={data} />
       <QuoteScreen data={data} />
       <Faq data={data} />
       <Releases />
