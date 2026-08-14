@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "motion/react";
 import { useRef, useState } from "react";
+import { Volume2, VolumeX } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { ResponsiveImage } from "@/components/ResponsiveImage";
 import { Gallery } from "@/components/Gallery";
@@ -85,9 +86,8 @@ function Index() {
     <main className="relative">
       <Nav />
       <Hero heroRef={heroRef} scale={scale} y={y} fade={fade} data={data} />
-      <Upcoming data={data} />
-      <Bio data={data} />
       <Cities data={data} />
+      <Bio data={data} />
       <QuoteScreen data={data} />
       <Faq data={data} />
       <Releases />
@@ -112,7 +112,7 @@ function Nav() {
           SCIRENA
         </a>
         <nav className="hidden items-center gap-8 text-xs tracking-[0.2em] text-muted-foreground md:flex">
-          <a className="transition-colors hover:text-foreground" href="#shows">КОНЦЕРТЫ</a>
+          <a className="transition-colors hover:text-foreground" href="#cities">КОНЦЕРТЫ</a>
           <a className="transition-colors hover:text-foreground" href="#bio">БИОГРАФИЯ</a>
           <a className="transition-colors hover:text-foreground" href="#cities">ГОРОДА</a>
           <a className="transition-colors hover:text-foreground" href="#faq">FAQ</a>
@@ -133,18 +133,54 @@ function Nav() {
 
 function Hero({ heroRef, scale, y, fade, data }: any) {
   const c = (data as SiteData).content;
+  const isVideo = (c["hero_media"] ?? "photo") === "video";
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [muted, setMuted] = useState(true);
+
   return (
     <section id="top" ref={heroRef} className="relative h-[100svh] overflow-hidden">
-      <ResponsiveImage
-        base={hero.base}
-        alt="SCIRENA — тур УЕЗЖАЕМ ОСТАЁМСЯ? 2026"
-        priority
-        sizes="100vw"
-        style={{ scale, y, willChange: "transform", backfaceVisibility: "hidden" }}
-        className="absolute inset-0 h-full w-full object-cover object-[60%_30%] opacity-70 transform-gpu"
-      />
+      {isVideo ? (
+        <motion.video
+          ref={videoRef}
+          src="/video/hero.mp4"
+          autoPlay
+          loop
+          muted={muted}
+          playsInline
+          preload="auto"
+          style={{ scale, y, willChange: "transform", backfaceVisibility: "hidden" }}
+          className="absolute inset-0 h-full w-full object-cover object-center opacity-70 transform-gpu"
+        />
+      ) : (
+        <ResponsiveImage
+          base={hero.base}
+          alt="SCIRENA — тур УЕЗЖАЕМ ОСТАЁМСЯ? 2026"
+          priority
+          sizes="100vw"
+          style={{ scale, y, willChange: "transform", backfaceVisibility: "hidden" }}
+          className="absolute inset-0 h-full w-full object-cover object-[60%_30%] opacity-70 transform-gpu"
+        />
+      )}
 
       <div className="veil absolute inset-0" />
+      {isVideo && (
+        <button
+          type="button"
+          aria-label={muted ? "Включить звук" : "Выключить звук"}
+          onClick={() => {
+            const v = videoRef.current;
+            const next = !muted;
+            setMuted(next);
+            if (v) {
+              v.muted = next;
+              if (!next) void v.play().catch(() => {});
+            }
+          }}
+          className="glass absolute right-5 top-20 z-20 flex h-9 w-9 items-center justify-center rounded-full text-foreground/80 transition-colors hover:text-foreground sm:right-10"
+        >
+          {muted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+        </button>
+      )}
       <motion.div
         style={{ opacity: fade }}
         className="relative z-10 flex h-full flex-col justify-end px-5 pb-12 sm:px-10 sm:pb-16 lg:px-16"
@@ -197,7 +233,7 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
                   КУПИТЬ БИЛЕТ
                 </a>
                 <a
-                  href="#shows"
+                  href="#cities"
                   className="glass rounded-full px-8 py-4 text-center text-xs font-semibold tracking-[0.2em] text-foreground transition-all duration-500 hover:scale-[1.04]"
                 >
                   ВСЕ ГОРОДА
@@ -244,51 +280,6 @@ function NoAnnouncements({ note }: { note: string }) {
   );
 }
 
-function Upcoming({ data }: { data: SiteData }) {
-  const shows = data.shows;
-  if (shows.length === 0)
-    return (
-      <section id="shows" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
-        <div className="mx-auto max-w-7xl">
-          <SectionTitle kicker="РАСПИСАНИЕ" title="БЛИЖАЙШИЕ КОНЦЕРТЫ" />
-          <NoAnnouncements note="Новые даты появятся здесь сразу после официального анонса тура." />
-        </div>
-      </section>
-    );
-  return (
-    <section id="shows" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
-      <div className="mx-auto max-w-7xl">
-        <SectionTitle kicker="РАСПИСАНИЕ" title="БЛИЖАЙШИЕ КОНЦЕРТЫ" />
-        <div className="mt-14 grid gap-4 md:grid-cols-2">
-
-          {shows.slice(0, 4).map((s, i) => (
-            <Reveal key={s.id} delay={i * 0.08}>
-              <motion.article
-                whileHover={{ scale: 1.025 }}
-                transition={{ duration: 0.7, ease }}
-                className="glass grid gap-5 rounded-2xl p-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-8"
-              >
-                <div className="min-w-0">
-                  <p className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-                    {s.date_label}
-                  </p>
-                  <p className="mt-3 text-lg break-words text-foreground">{s.city}</p>
-                  <p className="mt-1 text-sm break-words text-muted-foreground">{s.venue}</p>
-                </div>
-                <a
-                  href={s.ticket_url || "#cities"}
-                  className="shrink-0 rounded-full border border-border px-6 py-3 text-center text-[0.65rem] tracking-[0.2em] text-foreground transition-all duration-500 hover:bg-primary hover:text-primary-foreground"
-                >
-                  КУПИТЬ
-                </a>
-              </motion.article>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 function Bio({ data }: { data: SiteData }) {
   const c = data.content;

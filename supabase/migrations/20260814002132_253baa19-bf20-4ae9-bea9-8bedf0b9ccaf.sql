@@ -1,0 +1,1 @@
+INSERT INTO public.site_content (key, value) VALUES ('hero_media', 'video') ON CONFLICT (key) DO NOTHING;
