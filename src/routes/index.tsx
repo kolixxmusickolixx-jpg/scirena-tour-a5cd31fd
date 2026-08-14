@@ -132,18 +132,54 @@ function Nav() {
 
 function Hero({ heroRef, scale, y, fade, data }: any) {
   const c = (data as SiteData).content;
+  const isVideo = (c["hero_media"] ?? "photo") === "video";
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [muted, setMuted] = useState(true);
+
   return (
     <section id="top" ref={heroRef} className="relative h-[100svh] overflow-hidden">
-      <ResponsiveImage
-        base={hero.base}
-        alt="SCIRENA — тур УЕЗЖАЕМ ОСТАЁМСЯ? 2026"
-        priority
-        sizes="100vw"
-        style={{ scale, y, willChange: "transform", backfaceVisibility: "hidden" }}
-        className="absolute inset-0 h-full w-full object-cover object-[60%_30%] opacity-70 transform-gpu"
-      />
+      {isVideo ? (
+        <motion.video
+          ref={videoRef}
+          src="/video/hero.mp4"
+          autoPlay
+          loop
+          muted={muted}
+          playsInline
+          preload="auto"
+          style={{ scale, y, willChange: "transform", backfaceVisibility: "hidden" }}
+          className="absolute inset-0 h-full w-full object-cover object-center opacity-70 transform-gpu"
+        />
+      ) : (
+        <ResponsiveImage
+          base={hero.base}
+          alt="SCIRENA — тур УЕЗЖАЕМ ОСТАЁМСЯ? 2026"
+          priority
+          sizes="100vw"
+          style={{ scale, y, willChange: "transform", backfaceVisibility: "hidden" }}
+          className="absolute inset-0 h-full w-full object-cover object-[60%_30%] opacity-70 transform-gpu"
+        />
+      )}
 
       <div className="veil absolute inset-0" />
+      {isVideo && (
+        <button
+          type="button"
+          aria-label={muted ? "Включить звук" : "Выключить звук"}
+          onClick={() => {
+            const v = videoRef.current;
+            const next = !muted;
+            setMuted(next);
+            if (v) {
+              v.muted = next;
+              if (!next) void v.play().catch(() => {});
+            }
+          }}
+          className="glass absolute right-5 top-20 z-20 flex h-9 w-9 items-center justify-center rounded-full text-foreground/80 transition-colors hover:text-foreground sm:right-10"
+        >
+          {muted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+        </button>
+      )}
       <motion.div
         style={{ opacity: fade }}
         className="relative z-10 flex h-full flex-col justify-end px-5 pb-12 sm:px-10 sm:pb-16 lg:px-16"
