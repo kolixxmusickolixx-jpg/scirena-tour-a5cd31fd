@@ -137,6 +137,17 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
 
+  useEffect(() => {
+    if (!isVideo) return;
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = true;
+    const play = () => v.play().catch(() => {});
+    play();
+    v.addEventListener("loadeddata", play);
+    return () => v.removeEventListener("loadeddata", play);
+  }, [isVideo]);
+
   return (
     <section id="top" ref={heroRef} className="relative h-[100svh] overflow-hidden">
       {isVideo ? (
