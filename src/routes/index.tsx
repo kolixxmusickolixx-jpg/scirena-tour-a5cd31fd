@@ -148,8 +148,8 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
           muted={muted}
           playsInline
           preload="auto"
-          style={{ scale, y, willChange: "transform", backfaceVisibility: "hidden" }}
-          className="absolute inset-0 h-full w-full object-cover object-center opacity-70 transform-gpu"
+          style={{ scale, y, willChange: "transform", backfaceVisibility: "hidden", filter: "grayscale(100%) brightness(110%) contrast(110%)" }}
+          className="absolute inset-0 h-full w-full object-cover object-center opacity-100 transform-gpu"
         />
       ) : (
         <ResponsiveImage
@@ -162,7 +162,13 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
         />
       )}
 
-      <div className="veil absolute inset-0" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, oklch(0.07 0 0 / 12%) 0%, oklch(0.07 0 0 / 28%) 40%, oklch(0.07 0 0 / 62%) 100%)",
+        }}
+      />
       {isVideo && (
         <button
           type="button"
