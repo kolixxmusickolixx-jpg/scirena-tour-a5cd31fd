@@ -280,51 +280,6 @@ function NoAnnouncements({ note }: { note: string }) {
   );
 }
 
-function Upcoming({ data }: { data: SiteData }) {
-  const shows = data.shows;
-  if (shows.length === 0)
-    return (
-      <section id="shows" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
-        <div className="mx-auto max-w-7xl">
-          <SectionTitle kicker="РАСПИСАНИЕ" title="БЛИЖАЙШИЕ КОНЦЕРТЫ" />
-          <NoAnnouncements note="Новые даты появятся здесь сразу после официального анонса тура." />
-        </div>
-      </section>
-    );
-  return (
-    <section id="shows" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
-      <div className="mx-auto max-w-7xl">
-        <SectionTitle kicker="РАСПИСАНИЕ" title="БЛИЖАЙШИЕ КОНЦЕРТЫ" />
-        <div className="mt-14 grid gap-4 md:grid-cols-2">
-
-          {shows.slice(0, 4).map((s, i) => (
-            <Reveal key={s.id} delay={i * 0.08}>
-              <motion.article
-                whileHover={{ scale: 1.025 }}
-                transition={{ duration: 0.7, ease }}
-                className="glass grid gap-5 rounded-2xl p-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-8"
-              >
-                <div className="min-w-0">
-                  <p className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-                    {s.date_label}
-                  </p>
-                  <p className="mt-3 text-lg break-words text-foreground">{s.city}</p>
-                  <p className="mt-1 text-sm break-words text-muted-foreground">{s.venue}</p>
-                </div>
-                <a
-                  href={s.ticket_url || "#cities"}
-                  className="shrink-0 rounded-full border border-border px-6 py-3 text-center text-[0.65rem] tracking-[0.2em] text-foreground transition-all duration-500 hover:bg-primary hover:text-primary-foreground"
-                >
-                  КУПИТЬ
-                </a>
-              </motion.article>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 function Bio({ data }: { data: SiteData }) {
   const c = data.content;
