@@ -112,7 +112,7 @@ function Nav() {
           SCIRENA
         </a>
         <nav className="hidden items-center gap-8 text-xs tracking-[0.2em] text-muted-foreground md:flex">
-          <a className="transition-colors hover:text-foreground" href="#shows">КОНЦЕРТЫ</a>
+          <a className="transition-colors hover:text-foreground" href="#cities">КОНЦЕРТЫ</a>
           <a className="transition-colors hover:text-foreground" href="#bio">БИОГРАФИЯ</a>
           <a className="transition-colors hover:text-foreground" href="#cities">ГОРОДА</a>
           <a className="transition-colors hover:text-foreground" href="#faq">FAQ</a>
@@ -233,7 +233,7 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
                   КУПИТЬ БИЛЕТ
                 </a>
                 <a
-                  href="#shows"
+                  href="#cities"
                   className="glass rounded-full px-8 py-4 text-center text-xs font-semibold tracking-[0.2em] text-foreground transition-all duration-500 hover:scale-[1.04]"
                 >
                   ВСЕ ГОРОДА
