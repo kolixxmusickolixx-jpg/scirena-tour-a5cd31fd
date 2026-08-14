@@ -639,6 +639,7 @@ function SocialCard({ row, onChange }: { row: SocialRow; onChange: () => void })
 }
 
 const CONTENT_LABELS: Record<string, string> = {
+  hero_media: "Фон Hero",
   hero_artist: "Имя артиста (шапка)",
   hero_title_line1: "Заголовок — строка 1",
   hero_title_line2: "Заголовок — строка 2",
@@ -667,7 +668,31 @@ function ContentTab({ rows, onChange }: { rows: ContentRow[]; onChange: () => vo
 
   return (
     <div className={`${cardCls} space-y-4`}>
-      {rows.map((r) => (
+      {rows.map((r) =>
+        r.key === "hero_media" ? (
+          <div key={r.key}>
+            <span className={labelCls}>{(CONTENT_LABELS[r.key] ?? r.key).toUpperCase()}</span>
+            <div className="inline-flex rounded-xl border border-border bg-secondary/40 p-1">
+              {[
+                { v: "photo", l: "ФОТО" },
+                { v: "video", l: "ВИДЕО" },
+              ].map((o) => (
+                <button
+                  key={o.v}
+                  type="button"
+                  onClick={() => setDraft({ ...draft, hero_media: o.v })}
+                  className={`rounded-lg px-4 py-2 text-[0.65rem] font-semibold tracking-[0.18em] transition-colors ${
+                    (draft["hero_media"] ?? "photo") === o.v
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {o.l}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
         <label key={r.key} className="block">
           <span className={labelCls}>{(CONTENT_LABELS[r.key] ?? r.key).toUpperCase()}</span>
           {(draft[r.key] ?? "").length > 90 ? (
@@ -684,7 +709,8 @@ function ContentTab({ rows, onChange }: { rows: ContentRow[]; onChange: () => vo
             />
           )}
         </label>
-      ))}
+        ),
+      )}
       <button
         className={btnCls}
         disabled={saving}
