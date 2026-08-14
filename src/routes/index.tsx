@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "motion/react";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { ResponsiveImage } from "@/components/ResponsiveImage";
@@ -137,17 +137,6 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
 
-  useEffect(() => {
-    if (!isVideo) return;
-    const v = videoRef.current;
-    if (!v) return;
-    v.muted = true;
-    const play = () => v.play().catch(() => {});
-    play();
-    v.addEventListener("loadeddata", play);
-    return () => v.removeEventListener("loadeddata", play);
-  }, [isVideo]);
-
   return (
     <section id="top" ref={heroRef} className="relative h-[100svh] overflow-hidden">
       {isVideo ? (
@@ -159,8 +148,8 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
           muted={muted}
           playsInline
           preload="auto"
-          style={{ scale, y, willChange: "transform", backfaceVisibility: "hidden", filter: "grayscale(100%) brightness(130%) contrast(115%)" }}
-          className="absolute inset-0 h-full w-full object-cover object-center opacity-100 transform-gpu"
+          style={{ scale, y, willChange: "transform", backfaceVisibility: "hidden" }}
+          className="absolute inset-0 h-full w-full object-cover object-center opacity-70 transform-gpu"
         />
       ) : (
         <ResponsiveImage
@@ -173,13 +162,7 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
         />
       )}
 
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, oklch(0.07 0 0 / 8%) 0%, oklch(0.07 0 0 / 18%) 40%, oklch(0.07 0 0 / 48%) 100%)",
-        }}
-      />
+      <div className="veil absolute inset-0" />
       {isVideo && (
         <button
           type="button"
@@ -199,7 +182,7 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
         </button>
       )}
       <motion.div
-        style={{ opacity: fade, textShadow: "0 2px 24px rgba(0,0,0,0.55)" }}
+        style={{ opacity: fade }}
         className="relative z-10 flex h-full flex-col justify-end px-5 pb-12 sm:px-10 sm:pb-16 lg:px-16"
       >
         <div className="mx-auto w-full max-w-7xl">
