@@ -199,7 +199,7 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
         </button>
       )}
       <motion.div
-        style={{ opacity: fade }}
+        style={{ opacity: fade, textShadow: "0 2px 24px rgba(0,0,0,0.55)" }}
         className="relative z-10 flex h-full flex-col justify-end px-5 pb-12 sm:px-10 sm:pb-16 lg:px-16"
       >
         <div className="mx-auto w-full max-w-7xl">
