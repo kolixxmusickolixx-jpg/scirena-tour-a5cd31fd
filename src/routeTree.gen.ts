@@ -16,6 +16,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as GalleryIndexRouteImport } from './routes/gallery.index'
 import { Route as GalleryAlbumIdRouteImport } from './routes/gallery.$albumId'
 import { Route as ReleasesIndexRouteImport } from './routes/releases.index'
+import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -51,6 +52,11 @@ const ReleasesIndexRoute = ReleasesIndexRouteImport.update({
   path: '/releases/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicTrackRoute = ApiPublicTrackRouteImport.update({
+  id: '/api/public/track',
+  path: '/api/public/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/gallery/$albumId': typeof GalleryAlbumIdRoute
   '/gallery/': typeof GalleryIndexRoute
   '/releases/': typeof ReleasesIndexRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/gallery/$albumId': typeof GalleryAlbumIdRoute
   '/gallery': typeof GalleryIndexRoute
   '/releases': typeof ReleasesIndexRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,13 +85,27 @@ export interface FileRoutesById {
   '/gallery/$albumId': typeof GalleryAlbumIdRoute
   '/gallery/': typeof GalleryIndexRoute
   '/releases/': typeof ReleasesIndexRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/admin' | '/gallery/$albumId' | '/gallery/' | '/releases/'
+    | '/'
+    | '/auth'
+    | '/admin'
+    | '/gallery/$albumId'
+    | '/gallery/'
+    | '/releases/'
+    | '/api/public/track'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/admin' | '/gallery/$albumId' | '/gallery' | '/releases'
+  to:
+    | '/'
+    | '/auth'
+    | '/admin'
+    | '/gallery/$albumId'
+    | '/gallery'
+    | '/releases'
+    | '/api/public/track'
   id:
     | '__root__'
     | '/'
@@ -93,6 +115,7 @@ export interface FileRouteTypes {
     | '/gallery/$albumId'
     | '/gallery/'
     | '/releases/'
+    | '/api/public/track'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -102,6 +125,7 @@ export interface RootRouteChildren {
   GalleryAlbumIdRoute: typeof GalleryAlbumIdRoute
   GalleryIndexRoute: typeof GalleryIndexRoute
   ReleasesIndexRoute: typeof ReleasesIndexRoute
+  ApiPublicTrackRoute: typeof ApiPublicTrackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -155,6 +179,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReleasesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/track': {
+      id: '/api/public/track'
+      path: '/api/public/track'
+      fullPath: '/api/public/track'
+      preLoaderRoute: typeof ApiPublicTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -176,6 +207,7 @@ const rootRouteChildren: RootRouteChildren = {
   GalleryAlbumIdRoute: GalleryAlbumIdRoute,
   GalleryIndexRoute: GalleryIndexRoute,
   ReleasesIndexRoute: ReleasesIndexRoute,
+  ApiPublicTrackRoute: ApiPublicTrackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
