@@ -80,6 +80,98 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_events: {
+        Row: {
+          country: string
+          created_at: string
+          device: string
+          duration_ms: number
+          event_name: string
+          id: string
+          path: string
+          props: Json
+          session_id: string
+          source: string
+          visitor_id: string
+        }
+        Insert: {
+          country?: string
+          created_at?: string
+          device?: string
+          duration_ms?: number
+          event_name: string
+          id?: string
+          path?: string
+          props?: Json
+          session_id: string
+          source?: string
+          visitor_id: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          device?: string
+          duration_ms?: number
+          event_name?: string
+          id?: string
+          path?: string
+          props?: Json
+          session_id?: string
+          source?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_sessions: {
+        Row: {
+          country: string
+          device: string
+          entry_path: string
+          id: string
+          is_new: boolean
+          last_seen_at: string
+          page_views: number
+          referrer_host: string
+          source: string
+          started_at: string
+          visitor_id: string
+        }
+        Insert: {
+          country?: string
+          device?: string
+          entry_path?: string
+          id: string
+          is_new?: boolean
+          last_seen_at?: string
+          page_views?: number
+          referrer_host?: string
+          source?: string
+          started_at?: string
+          visitor_id: string
+        }
+        Update: {
+          country?: string
+          device?: string
+          entry_path?: string
+          id?: string
+          is_new?: boolean
+          last_seen_at?: string
+          page_views?: number
+          referrer_host?: string
+          source?: string
+          started_at?: string
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       faq_items: {
         Row: {
           answer: string
@@ -401,6 +493,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      analytics_track: {
+        Args: {
+          p_country: string
+          p_device: string
+          p_duration_ms: number
+          p_event: string
+          p_is_new: boolean
+          p_path: string
+          p_props: Json
+          p_referrer_host: string
+          p_session_id: string
+          p_source: string
+          p_visitor_id: string
+        }
+        Returns: Json
+      }
       claim_admin: { Args: never; Returns: boolean }
       has_role: {
         Args: {
