@@ -17,6 +17,7 @@ import {
   Menu,
   Inbox,
   Disc3,
+  BarChart3,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminTwoFactor, revokeAdminTwoFactor } from "@/lib/twofa.functions";
@@ -24,6 +25,7 @@ import { checkAdminTwoFactor, revokeAdminTwoFactor } from "@/lib/twofa.functions
 import { signPaths, galleryKeys } from "@/lib/gallery";
 import { SupportTab } from "@/components/admin/SupportTab";
 import { ReleasesTab } from "@/components/admin/ReleasesTab";
+import { AnalyticsTab } from "@/components/admin/AnalyticsTab";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -54,7 +56,15 @@ const ghostCls =
   "inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-[0.65rem] tracking-[0.18em] text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground";
 const cardCls = "glass rounded-2xl p-5 sm:p-6";
 
-type Tab = "shows" | "content" | "faq" | "socials" | "releases" | "gallery" | "support";
+type Tab =
+  | "analytics"
+  | "shows"
+  | "content"
+  | "faq"
+  | "socials"
+  | "releases"
+  | "gallery"
+  | "support";
 
 const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[] = [
   { id: "shows", label: "Концерты", icon: CalendarDays, hint: "Города, площадки и билеты" },
