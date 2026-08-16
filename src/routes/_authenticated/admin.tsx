@@ -284,6 +284,7 @@ function AdminPage() {
 
         <main className="px-5 py-8 sm:px-8 sm:py-10">
           <div className="mx-auto max-w-4xl space-y-4">
+            {tab === "analytics" && <AnalyticsTab />}
             {tab === "shows" && <ShowsTab rows={shows.data ?? []} onChange={() => refresh("shows")} />}
             {tab === "content" && (
               <ContentTab rows={content.data ?? []} onChange={() => refresh("content")} />
