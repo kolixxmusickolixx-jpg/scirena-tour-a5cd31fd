@@ -67,6 +67,7 @@ type Tab =
   | "support";
 
 const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[] = [
+  { id: "analytics", label: "Аналитика", icon: BarChart3, hint: "Посещаемость и источники" },
   { id: "shows", label: "Концерты", icon: CalendarDays, hint: "Города, площадки и билеты" },
   { id: "content", label: "Тексты", icon: Type, hint: "Заголовки, биография, цитата" },
   { id: "faq", label: "FAQ", icon: HelpCircle, hint: "Вопросы и ответы" },
@@ -188,6 +189,7 @@ function AdminPage() {
 
   const active = TABS.find((t) => t.id === tab) ?? TABS[0]!;
   const counts: Record<Tab, number | null> = {
+    analytics: null,
     shows: shows.data?.length ?? null,
     content: content.data?.length ?? null,
     faq: faq.data?.length ?? null,
@@ -282,6 +284,7 @@ function AdminPage() {
 
         <main className="px-5 py-8 sm:px-8 sm:py-10">
           <div className="mx-auto max-w-4xl space-y-4">
+            {tab === "analytics" && <AnalyticsTab />}
             {tab === "shows" && <ShowsTab rows={shows.data ?? []} onChange={() => refresh("shows")} />}
             {tab === "content" && (
               <ContentTab rows={content.data ?? []} onChange={() => refresh("content")} />
