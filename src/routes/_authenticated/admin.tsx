@@ -67,6 +67,7 @@ type Tab =
   | "support";
 
 const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[] = [
+  { id: "analytics", label: "Аналитика", icon: BarChart3, hint: "Посещаемость и источники" },
   { id: "shows", label: "Концерты", icon: CalendarDays, hint: "Города, площадки и билеты" },
   { id: "content", label: "Тексты", icon: Type, hint: "Заголовки, биография, цитата" },
   { id: "faq", label: "FAQ", icon: HelpCircle, hint: "Вопросы и ответы" },
