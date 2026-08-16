@@ -189,6 +189,7 @@ function AdminPage() {
 
   const active = TABS.find((t) => t.id === tab) ?? TABS[0]!;
   const counts: Record<Tab, number | null> = {
+    analytics: null,
     shows: shows.data?.length ?? null,
     content: content.data?.length ?? null,
     faq: faq.data?.length ?? null,
