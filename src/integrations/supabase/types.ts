@@ -562,9 +562,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_mark_temp_password: { Args: { p_user_id: string }; Returns: Json }
       admin_me: { Args: never; Returns: Json }
       admin_password_changed: { Args: never; Returns: undefined }
       admin_role: { Args: never; Returns: string }
+      admin_upsert_user: {
+        Args: { p_email: string; p_role: string; p_user_id: string }
+        Returns: Json
+      }
       analytics_track: {
         Args: {
           p_country: string
