@@ -80,6 +80,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_users: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string
+          must_change_password: boolean
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email: string
+          must_change_password?: boolean
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string
+          must_change_password?: boolean
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           country: string
@@ -272,6 +302,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      media_items: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          kind: string
+          published: boolean
+          sort_order: number
+          thumb_url: string
+          title: string
+          updated_at: string
+          video_url: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          kind?: string
+          published?: boolean
+          sort_order?: number
+          thumb_url?: string
+          title?: string
+          updated_at?: string
+          video_url?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          kind?: string
+          published?: boolean
+          sort_order?: number
+          thumb_url?: string
+          title?: string
+          updated_at?: string
+          video_url?: string
+        }
+        Relationships: []
       }
       releases: {
         Row: {
@@ -493,6 +562,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_mark_temp_password: { Args: { p_user_id: string }; Returns: Json }
+      admin_me: { Args: never; Returns: Json }
+      admin_password_changed: { Args: never; Returns: undefined }
+      admin_role: { Args: never; Returns: string }
+      admin_upsert_user: {
+        Args: { p_email: string; p_role: string; p_user_id: string }
+        Returns: Json
+      }
       analytics_track: {
         Args: {
           p_country: string
@@ -509,6 +586,7 @@ export type Database = {
         }
         Returns: Json
       }
+      can_manage: { Args: { _section: string }; Returns: boolean }
       claim_admin: { Args: never; Returns: boolean }
       has_role: {
         Args: {
@@ -517,6 +595,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_full_admin: { Args: never; Returns: boolean }
       support_create_ticket: {
         Args: { p_email: string; p_message: string; p_name: string }
         Returns: Json
