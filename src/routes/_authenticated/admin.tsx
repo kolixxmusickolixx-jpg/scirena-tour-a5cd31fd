@@ -18,14 +18,20 @@ import {
   Inbox,
   Disc3,
   BarChart3,
+  Users,
+  Clapperboard,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminTwoFactor, revokeAdminTwoFactor } from "@/lib/twofa.functions";
+import { getMyAdminAccess, completePasswordChange } from "@/lib/admins.functions";
+import { allowedSections, roleLabel } from "@/lib/roles";
 
 import { signPaths, galleryKeys } from "@/lib/gallery";
 import { SupportTab } from "@/components/admin/SupportTab";
 import { ReleasesTab } from "@/components/admin/ReleasesTab";
 import { AnalyticsTab } from "@/components/admin/AnalyticsTab";
+import { AdminsTab } from "@/components/admin/AdminsTab";
+import { MediaTab } from "@/components/admin/MediaTab";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
