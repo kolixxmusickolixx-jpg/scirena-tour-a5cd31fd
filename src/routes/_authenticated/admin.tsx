@@ -18,14 +18,20 @@ import {
   Inbox,
   Disc3,
   BarChart3,
+  Users,
+  Clapperboard,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminTwoFactor, revokeAdminTwoFactor } from "@/lib/twofa.functions";
+import { getMyAdminAccess, completePasswordChange } from "@/lib/admins.functions";
+import { allowedSections, roleLabel } from "@/lib/roles";
 
 import { signPaths, galleryKeys } from "@/lib/gallery";
 import { SupportTab } from "@/components/admin/SupportTab";
 import { ReleasesTab } from "@/components/admin/ReleasesTab";
 import { AnalyticsTab } from "@/components/admin/AnalyticsTab";
+import { AdminsTab } from "@/components/admin/AdminsTab";
+import { MediaTab } from "@/components/admin/MediaTab";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -64,7 +70,9 @@ type Tab =
   | "socials"
   | "releases"
   | "gallery"
-  | "support";
+  | "media"
+  | "support"
+  | "admins";
 
 const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[] = [
   { id: "analytics", label: "Аналитика", icon: BarChart3, hint: "Посещаемость и источники" },
@@ -74,16 +82,20 @@ const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[
   { id: "socials", label: "Ссылки", icon: Link2, hint: "Соцсети в подвале" },
   { id: "releases", label: "Релизы", icon: Disc3, hint: "Синглы и альбомы" },
   { id: "gallery", label: "Галерея", icon: Images, hint: "Альбомы и фотографии" },
+  { id: "media", label: "Медиа", icon: Clapperboard, hint: "Видео и клипы" },
   { id: "support", label: "Обращения", icon: Inbox, hint: "Переписка с клиентами" },
+  { id: "admins", label: "Администраторы", icon: Users, hint: "Доступы и роли" },
 ];
 
 function AdminPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<Tab>("shows");
+  const [tab, setTab] = useState<Tab | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [twoFactorOk, setTwoFactorOk] = useState<boolean | null>(null);
   const [navOpen, setNavOpen] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
+  const [mustChangePassword, setMustChangePassword] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -97,8 +109,12 @@ function AdminPage() {
           return;
         }
         setTwoFactorOk(true);
-        const { data } = await supabase.rpc("claim_admin");
-        if (alive) setIsAdmin(Boolean(data));
+        await supabase.rpc("claim_admin");
+        const access = await getMyAdminAccess();
+        if (!alive) return;
+        setRole(access.role);
+        setMustChangePassword(access.mustChangePassword);
+        setIsAdmin(Boolean(access.role) && access.active);
       })
       .catch(async () => {
         if (!alive) return;
@@ -110,6 +126,16 @@ function AdminPage() {
       alive = false;
     };
   }, [navigate]);
+
+  const visibleTabs = TABS.filter((t) => allowedSections(role).includes(t.id));
+
+  useEffect(() => {
+    if (!visibleTabs.length) return;
+    if (!tab || !visibleTabs.some((t) => t.id === tab)) {
+      setTab(visibleTabs.some((t) => t.id === "shows") ? "shows" : visibleTabs[0]!.id);
+    }
+  }, [role, tab, visibleTabs]);
+
 
 
   const shows = useQuery({
@@ -171,13 +197,12 @@ function AdminPage() {
   }
 
   if (isAdmin === false) {
-
     return (
       <main className="flex min-h-screen items-center justify-center px-5 text-center">
         <div className="glass max-w-md rounded-3xl p-8">
           <h1 className="font-display text-2xl font-bold">Нет доступа</h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            У этого аккаунта нет прав администратора.
+            У этого аккаунта нет прав администратора или он деактивирован.
           </p>
           <button onClick={signOut} className={`${ghostCls} mt-6`}>
             <LogOut size={14} /> ВЫЙТИ
@@ -187,7 +212,19 @@ function AdminPage() {
     );
   }
 
-  const active = TABS.find((t) => t.id === tab) ?? TABS[0]!;
+  if (mustChangePassword) {
+    return <NewPasswordScreen onDone={() => setMustChangePassword(false)} onSignOut={signOut} />;
+  }
+
+  if (isAdmin === null || !tab) {
+    return (
+      <main className="flex min-h-screen items-center justify-center px-5 text-center">
+        <p className="text-[0.65rem] tracking-[0.3em] text-muted-foreground">ЗАГРУЗКА…</p>
+      </main>
+    );
+  }
+
+  const active = visibleTabs.find((t) => t.id === tab) ?? visibleTabs[0]!;
   const counts: Record<Tab, number | null> = {
     analytics: null,
     shows: shows.data?.length ?? null,
@@ -196,8 +233,11 @@ function AdminPage() {
     socials: socials.data?.length ?? null,
     releases: null,
     gallery: null,
+    media: null,
     support: null,
+    admins: null,
   };
+
 
   return (
     <div className="min-h-screen lg:flex">
@@ -210,12 +250,12 @@ function AdminPage() {
         <div>
           <p className="font-display text-lg font-extrabold tracking-[0.2em]">SCIRENA</p>
           <p className="mt-1 text-[0.55rem] tracking-[0.3em] text-muted-foreground">
-            ПАНЕЛЬ УПРАВЛЕНИЯ
+            {roleLabel(role).toUpperCase()}
           </p>
         </div>
 
         <nav className="mt-8 flex-1 space-y-1.5">
-          {TABS.map(({ id, label, icon: Icon }) => {
+          {visibleTabs.map(({ id, label, icon: Icon }) => {
             const isActive = tab === id;
             return (
               <button
@@ -295,13 +335,94 @@ function AdminPage() {
             )}
             {tab === "releases" && <ReleasesTab />}
             {tab === "gallery" && <GalleryTab />}
+            {tab === "media" && <MediaTab />}
             {tab === "support" && <SupportTab />}
+            {tab === "admins" && <AdminsTab />}
           </div>
         </main>
       </div>
     </div>
   );
 }
+
+function NewPasswordScreen({
+  onDone,
+  onSignOut,
+}: {
+  onDone: () => void;
+  onSignOut: () => void;
+}) {
+  const [password, setPassword] = useState("");
+  const [repeat, setRepeat] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (password.length < 8) {
+      toast.error("Минимум 8 символов");
+      return;
+    }
+    if (password !== repeat) {
+      toast.error("Пароли не совпадают");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw new Error(error.message);
+      await completePasswordChange();
+      toast.success("Пароль обновлён");
+      onDone();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Не удалось сменить пароль");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="flex min-h-screen items-center justify-center px-5">
+      <form onSubmit={submit} className="glass w-full max-w-md space-y-4 rounded-3xl p-8">
+        <h1 className="font-display text-2xl font-extrabold tracking-tight">НОВЫЙ ПАРОЛЬ</h1>
+        <p className="text-sm text-muted-foreground">
+          Вы вошли по временному паролю. Задайте постоянный — после этого временный перестанет
+          работать.
+        </p>
+        <div>
+          <label className={labelCls}>НОВЫЙ ПАРОЛЬ</label>
+          <input
+            type="password"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={inputCls}
+          />
+        </div>
+        <div>
+          <label className={labelCls}>ПОВТОРИТЕ ПАРОЛЬ</label>
+          <input
+            type="password"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            value={repeat}
+            onChange={(e) => setRepeat(e.target.value)}
+            className={inputCls}
+          />
+        </div>
+        <button type="submit" disabled={busy} className={`${btnCls} w-full justify-center`}>
+          {busy ? "СОХРАНЕНИЕ…" : "СОХРАНИТЬ ПАРОЛЬ"}
+        </button>
+        <button type="button" onClick={onSignOut} className={`${ghostCls} w-full justify-center`}>
+          <LogOut size={14} /> ВЫЙТИ
+        </button>
+      </form>
+    </main>
+  );
+}
+
 
 function useSaver(onChange: () => void) {
   return async (fn: () => PromiseLike<{ error: { message: string } | null }>, msg: string) => {
