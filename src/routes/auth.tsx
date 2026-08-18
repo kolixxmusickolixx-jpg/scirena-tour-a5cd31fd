@@ -29,7 +29,7 @@ const errText = (e: unknown) => (e instanceof Error ? e.message : "Что-то �
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"in" | "up">("in");
+  
   const [step, setStep] = useState<"credentials" | "code">("credentials");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
