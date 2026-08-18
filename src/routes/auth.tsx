@@ -139,9 +139,7 @@ function AuthPage() {
 
         {step === "credentials" ? (
           <>
-            <h1 className="font-display mt-6 text-3xl font-extrabold tracking-tight">
-              {mode === "in" ? "ВХОД" : "РЕГИСТРАЦИЯ"}
-            </h1>
+            <h1 className="font-display mt-6 text-3xl font-extrabold tracking-tight">ВХОД</h1>
             <p className="mt-2 text-sm text-muted-foreground">Панель управления сайтом тура</p>
 
             <form onSubmit={onCredentials} className="mt-8 space-y-4">
@@ -171,20 +169,13 @@ function AuthPage() {
                 disabled={loading}
                 className="w-full rounded-full bg-primary px-6 py-3 text-xs font-semibold tracking-[0.2em] text-primary-foreground disabled:opacity-50"
               >
-                {loading ? "..." : mode === "in" ? "ВОЙТИ" : "СОЗДАТЬ АККАУНТ"}
+                {loading ? "..." : "ВОЙТИ"}
               </button>
             </form>
 
-            <button
-              onClick={() => {
-                setMode(mode === "in" ? "up" : "in");
-                setError(null);
-                setNotice(null);
-              }}
-              className="mt-6 text-xs tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {mode === "in" ? "СОЗДАТЬ АККАУНТ" : "У МЕНЯ УЖЕ ЕСТЬ АККАУНТ"}
-            </button>
+            <p className="mt-6 text-[0.65rem] leading-relaxed tracking-[0.15em] text-muted-foreground">
+              ДОСТУП ВЫДАЁТ АДМИНИСТРАТОР
+            </p>
           </>
         ) : (
           <>
