@@ -197,13 +197,12 @@ function AdminPage() {
   }
 
   if (isAdmin === false) {
-
     return (
       <main className="flex min-h-screen items-center justify-center px-5 text-center">
         <div className="glass max-w-md rounded-3xl p-8">
           <h1 className="font-display text-2xl font-bold">Нет доступа</h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            У этого аккаунта нет прав администратора.
+            У этого аккаунта нет прав администратора или он деактивирован.
           </p>
           <button onClick={signOut} className={`${ghostCls} mt-6`}>
             <LogOut size={14} /> ВЫЙТИ
@@ -213,7 +212,19 @@ function AdminPage() {
     );
   }
 
-  const active = TABS.find((t) => t.id === tab) ?? TABS[0]!;
+  if (mustChangePassword) {
+    return <NewPasswordScreen onDone={() => setMustChangePassword(false)} onSignOut={signOut} />;
+  }
+
+  if (isAdmin === null || !tab) {
+    return (
+      <main className="flex min-h-screen items-center justify-center px-5 text-center">
+        <p className="text-[0.65rem] tracking-[0.3em] text-muted-foreground">ЗАГРУЗКА…</p>
+      </main>
+    );
+  }
+
+  const active = visibleTabs.find((t) => t.id === tab) ?? visibleTabs[0]!;
   const counts: Record<Tab, number | null> = {
     analytics: null,
     shows: shows.data?.length ?? null,
@@ -222,8 +233,11 @@ function AdminPage() {
     socials: socials.data?.length ?? null,
     releases: null,
     gallery: null,
+    media: null,
     support: null,
+    admins: null,
   };
+
 
   return (
     <div className="min-h-screen lg:flex">
