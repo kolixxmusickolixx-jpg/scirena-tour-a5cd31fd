@@ -358,8 +358,14 @@ function NewPasswordScreen({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (password.length < 8) return toast.error("Минимум 8 символов");
-    if (password !== repeat) return toast.error("Пароли не совпадают");
+    if (password.length < 8) {
+      toast.error("Минимум 8 символов");
+      return;
+    }
+    if (password !== repeat) {
+      toast.error("Пароли не совпадают");
+      return;
+    }
     setBusy(true);
     try {
       const { error } = await supabase.auth.updateUser({ password });
