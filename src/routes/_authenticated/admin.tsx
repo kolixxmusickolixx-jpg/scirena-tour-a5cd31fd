@@ -90,10 +90,12 @@ const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[
 function AdminPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<Tab>("shows");
+  const [tab, setTab] = useState<Tab | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [twoFactorOk, setTwoFactorOk] = useState<boolean | null>(null);
   const [navOpen, setNavOpen] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
+  const [mustChangePassword, setMustChangePassword] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -107,8 +109,12 @@ function AdminPage() {
           return;
         }
         setTwoFactorOk(true);
-        const { data } = await supabase.rpc("claim_admin");
-        if (alive) setIsAdmin(Boolean(data));
+        await supabase.rpc("claim_admin");
+        const access = await getMyAdminAccess();
+        if (!alive) return;
+        setRole(access.role);
+        setMustChangePassword(access.mustChangePassword);
+        setIsAdmin(Boolean(access.role) && access.active);
       })
       .catch(async () => {
         if (!alive) return;
@@ -120,6 +126,16 @@ function AdminPage() {
       alive = false;
     };
   }, [navigate]);
+
+  const visibleTabs = TABS.filter((t) => allowedSections(role).includes(t.id));
+
+  useEffect(() => {
+    if (!visibleTabs.length) return;
+    if (!tab || !visibleTabs.some((t) => t.id === tab)) {
+      setTab(visibleTabs.some((t) => t.id === "shows") ? "shows" : visibleTabs[0]!.id);
+    }
+  }, [role, tab, visibleTabs]);
+
 
 
   const shows = useQuery({
