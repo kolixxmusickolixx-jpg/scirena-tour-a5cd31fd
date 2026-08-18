@@ -67,18 +67,6 @@ function AuthPage() {
     setNotice(null);
     setLoading(true);
     try {
-      if (mode === "up") {
-        const { error: err } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (err) throw new Error(err.message);
-        await supabase.auth.signOut();
-        setNotice("Аккаунт создан. Подтвердите почту и войдите.");
-        setMode("in");
-        return;
-      }
       const res = await startAdminLogin({ data: { email, password } });
       passwordRef.current = password;
       setPassword("");
