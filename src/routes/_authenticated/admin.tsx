@@ -250,12 +250,12 @@ function AdminPage() {
         <div>
           <p className="font-display text-lg font-extrabold tracking-[0.2em]">SCIRENA</p>
           <p className="mt-1 text-[0.55rem] tracking-[0.3em] text-muted-foreground">
-            ПАНЕЛЬ УПРАВЛЕНИЯ
+            {roleLabel(role).toUpperCase()}
           </p>
         </div>
 
         <nav className="mt-8 flex-1 space-y-1.5">
-          {TABS.map(({ id, label, icon: Icon }) => {
+          {visibleTabs.map(({ id, label, icon: Icon }) => {
             const isActive = tab === id;
             return (
               <button
