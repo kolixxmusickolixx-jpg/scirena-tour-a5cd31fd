@@ -335,13 +335,88 @@ function AdminPage() {
             )}
             {tab === "releases" && <ReleasesTab />}
             {tab === "gallery" && <GalleryTab />}
+            {tab === "media" && <MediaTab />}
             {tab === "support" && <SupportTab />}
+            {tab === "admins" && <AdminsTab />}
           </div>
         </main>
       </div>
     </div>
   );
 }
+
+function NewPasswordScreen({
+  onDone,
+  onSignOut,
+}: {
+  onDone: () => void;
+  onSignOut: () => void;
+}) {
+  const [password, setPassword] = useState("");
+  const [repeat, setRepeat] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (password.length < 8) return toast.error("Минимум 8 символов");
+    if (password !== repeat) return toast.error("Пароли не совпадают");
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw new Error(error.message);
+      await completePasswordChange();
+      toast.success("Пароль обновлён");
+      onDone();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Не удалось сменить пароль");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="flex min-h-screen items-center justify-center px-5">
+      <form onSubmit={submit} className="glass w-full max-w-md space-y-4 rounded-3xl p-8">
+        <h1 className="font-display text-2xl font-extrabold tracking-tight">НОВЫЙ ПАРОЛЬ</h1>
+        <p className="text-sm text-muted-foreground">
+          Вы вошли по временному паролю. Задайте постоянный — после этого временный перестанет
+          работать.
+        </p>
+        <div>
+          <label className={labelCls}>НОВЫЙ ПАРОЛЬ</label>
+          <input
+            type="password"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={inputCls}
+          />
+        </div>
+        <div>
+          <label className={labelCls}>ПОВТОРИТЕ ПАРОЛЬ</label>
+          <input
+            type="password"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            value={repeat}
+            onChange={(e) => setRepeat(e.target.value)}
+            className={inputCls}
+          />
+        </div>
+        <button type="submit" disabled={busy} className={`${btnCls} w-full justify-center`}>
+          {busy ? "СОХРАНЕНИЕ…" : "СОХРАНИТЬ ПАРОЛЬ"}
+        </button>
+        <button type="button" onClick={onSignOut} className={`${ghostCls} w-full justify-center`}>
+          <LogOut size={14} /> ВЫЙТИ
+        </button>
+      </form>
+    </main>
+  );
+}
+
 
 function useSaver(onChange: () => void) {
   return async (fn: () => PromiseLike<{ error: { message: string } | null }>, msg: string) => {
