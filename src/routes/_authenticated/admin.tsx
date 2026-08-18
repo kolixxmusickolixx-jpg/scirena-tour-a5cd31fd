@@ -70,7 +70,9 @@ type Tab =
   | "socials"
   | "releases"
   | "gallery"
-  | "support";
+  | "media"
+  | "support"
+  | "admins";
 
 const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[] = [
   { id: "analytics", label: "Аналитика", icon: BarChart3, hint: "Посещаемость и источники" },
@@ -80,7 +82,9 @@ const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[
   { id: "socials", label: "Ссылки", icon: Link2, hint: "Соцсети в подвале" },
   { id: "releases", label: "Релизы", icon: Disc3, hint: "Синглы и альбомы" },
   { id: "gallery", label: "Галерея", icon: Images, hint: "Альбомы и фотографии" },
+  { id: "media", label: "Медиа", icon: Clapperboard, hint: "Видео и клипы" },
   { id: "support", label: "Обращения", icon: Inbox, hint: "Переписка с клиентами" },
+  { id: "admins", label: "Администраторы", icon: Users, hint: "Доступы и роли" },
 ];
 
 function AdminPage() {
