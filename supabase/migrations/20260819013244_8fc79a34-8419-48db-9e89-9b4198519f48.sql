@@ -1,0 +1,13 @@
+REVOKE ALL ON FUNCTION public.write_activity(text, text, text, text, jsonb) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.log_content_change() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.log_admin_change() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.log_activity(text, text, text, text, jsonb) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.admin_touch_login() FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.admin_update_profile(text, text) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.admin_delete_user(uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.admin_set_name(uuid, text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.log_activity(text, text, text, text, jsonb) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_touch_login() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_update_profile(text, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_delete_user(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_set_name(uuid, text) TO authenticated;
