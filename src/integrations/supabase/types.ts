@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          action: string
+          actor_email: string
+          actor_id: string | null
+          actor_name: string
+          actor_role: string
+          created_at: string
+          details: Json
+          entity: string
+          id: string
+          object_id: string
+          object_label: string
+        }
+        Insert: {
+          action: string
+          actor_email?: string
+          actor_id?: string | null
+          actor_name?: string
+          actor_role?: string
+          created_at?: string
+          details?: Json
+          entity?: string
+          id?: string
+          object_id?: string
+          object_label?: string
+        }
+        Update: {
+          action?: string
+          actor_email?: string
+          actor_id?: string | null
+          actor_name?: string
+          actor_role?: string
+          created_at?: string
+          details?: Json
+          entity?: string
+          id?: string
+          object_id?: string
+          object_label?: string
+        }
+        Relationships: []
+      }
       admin_2fa_challenges: {
         Row: {
           attempts: number
@@ -83,27 +125,36 @@ export type Database = {
       admin_users: {
         Row: {
           active: boolean
+          avatar_url: string
           created_at: string
           email: string
+          last_login_at: string | null
           must_change_password: boolean
+          name: string
           role: string
           updated_at: string
           user_id: string
         }
         Insert: {
           active?: boolean
+          avatar_url?: string
           created_at?: string
           email: string
+          last_login_at?: string | null
           must_change_password?: boolean
+          name?: string
           role?: string
           updated_at?: string
           user_id: string
         }
         Update: {
           active?: boolean
+          avatar_url?: string
           created_at?: string
           email?: string
+          last_login_at?: string | null
           must_change_password?: boolean
+          name?: string
           role?: string
           updated_at?: string
           user_id?: string
@@ -562,10 +613,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_user: { Args: { p_user_id: string }; Returns: Json }
       admin_mark_temp_password: { Args: { p_user_id: string }; Returns: Json }
       admin_me: { Args: never; Returns: Json }
       admin_password_changed: { Args: never; Returns: undefined }
       admin_role: { Args: never; Returns: string }
+      admin_set_name: {
+        Args: { p_name: string; p_user_id: string }
+        Returns: Json
+      }
+      admin_touch_login: { Args: never; Returns: Json }
+      admin_update_profile: {
+        Args: { p_avatar_url: string; p_name: string }
+        Returns: Json
+      }
       admin_upsert_user: {
         Args: { p_email: string; p_role: string; p_user_id: string }
         Returns: Json
@@ -596,6 +657,16 @@ export type Database = {
         Returns: boolean
       }
       is_full_admin: { Args: never; Returns: boolean }
+      log_activity: {
+        Args: {
+          p_action: string
+          p_details?: Json
+          p_entity?: string
+          p_object_id?: string
+          p_object_label?: string
+        }
+        Returns: Json
+      }
       support_create_ticket: {
         Args: { p_email: string; p_message: string; p_name: string }
         Returns: Json
@@ -648,6 +719,16 @@ export type Database = {
           p_max_attempts: number
         }
         Returns: Json
+      }
+      write_activity: {
+        Args: {
+          p_action: string
+          p_details: Json
+          p_entity: string
+          p_object_id: string
+          p_object_label: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
