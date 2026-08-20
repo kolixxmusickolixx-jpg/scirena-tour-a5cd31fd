@@ -120,7 +120,9 @@ export const listAdminUsers = createServerFn({ method: "POST" })
     await assertFullAdmin(context.supabase);
     const { data, error } = await context.supabase
       .from("admin_users" as any)
-      .select("user_id, email, role, active, must_change_password, created_at")
+      .select(
+        "user_id, email, name, avatar_url, role, active, must_change_password, created_at, last_login_at",
+      )
       .order("created_at");
     if (error) throw new Error("Не удалось загрузить список");
     return { rows: (data ?? []) as any[], selfId: context.userId };
