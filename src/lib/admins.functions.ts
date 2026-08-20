@@ -58,6 +58,14 @@ export const resetAdminPassword = createServerFn({ method: "POST" })
     const { resetAuthPassword, sendPasswordEmail } = await import("./admins.server");
     const result = await resetAuthPassword(data.userId, data.email);
 
+    await (context.supabase as any).rpc("log_activity", {
+      p_action: "admin_password_reset",
+      p_entity: "admin_users",
+      p_object_id: data.userId,
+      p_object_label: data.email,
+      p_details: {},
+    });
+
     if (result.password) {
       await (context.supabase as any).rpc("admin_mark_temp_password", { p_user_id: data.userId });
       await sendPasswordEmail(data.email, result.password, { reset: true });
