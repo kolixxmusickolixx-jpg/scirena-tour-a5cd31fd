@@ -42,7 +42,7 @@ export const ENTITY_LABELS: Record<string, string> = {
 };
 
 export const actionLabel = (a: string) => ACTION_LABELS[a] ?? a;
-export const entityLabel = (e: string) => ENTITY_LABELS[e] ?? e || "—";
+export const entityLabel = (e: string) => ENTITY_LABELS[e] ?? (e || "—");
 
 export const ACTION_GROUPS = [
   { id: "all", label: "Все действия" },
