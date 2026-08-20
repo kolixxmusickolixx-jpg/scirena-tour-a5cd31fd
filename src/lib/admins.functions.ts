@@ -134,3 +134,48 @@ export const completePasswordChange = createServerFn({ method: "POST" })
     await (context.supabase as any).rpc("admin_password_changed");
     return { ok: true };
   });
+
+export const deleteAdminUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { userId: string }) => {
+    const userId = clean(input?.userId, 64);
+    if (!userId) throw new Error("Пользователь не найден");
+    return { userId };
+  })
+  .handler(async ({ data, context }) => {
+    await assertFullAdmin(context.supabase);
+
+    const { data: res, error } = await (context.supabase as any).rpc("admin_delete_user", {
+      p_user_id: data.userId,
+    });
+    if (error) throw new Error("Не удалось удалить администратора");
+    if (!res?.ok) {
+      const map: Record<string, string> = {
+        forbidden: "Недостаточно прав",
+        self: "Нельзя удалить самого себя",
+        last_admin: "Нельзя удалить последнего администратора с полными правами",
+        not_found: "Пользователь не найден",
+      };
+      throw new Error(map[res?.error as string] ?? "Не удалось удалить администратора");
+    }
+
+    const { deleteAuthUser } = await import("./admins.server");
+    await deleteAuthUser(data.userId);
+    return { ok: true };
+  });
+
+export const setAdminName = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { userId: string; name: string }) => ({
+    userId: clean(input?.userId, 64),
+    name: clean(input?.name, 80),
+  }))
+  .handler(async ({ data, context }) => {
+    await assertFullAdmin(context.supabase);
+    const { error } = await (context.supabase as any).rpc("admin_set_name", {
+      p_user_id: data.userId,
+      p_name: data.name,
+    });
+    if (error) throw new Error("Не удалось сохранить имя");
+    return { ok: true };
+  });
