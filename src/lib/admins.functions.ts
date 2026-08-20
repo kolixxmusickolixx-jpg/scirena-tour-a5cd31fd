@@ -12,12 +12,13 @@ async function assertFullAdmin(supabase: any) {
 
 export const createAdminUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { email: string; role: string }) => {
+  .inputValidator((input: { email: string; role: string; name?: string }) => {
     const email = clean(input?.email, 160).toLowerCase();
     const role = clean(input?.role, 20);
+    const name = clean(input?.name, 80);
     if (!isEmail(email)) throw new Error("Укажите корректный email");
     if (!ROLES.includes(role)) throw new Error("Выберите роль");
-    return { email, role };
+    return { email, role, name };
   })
   .handler(async ({ data, context }) => {
     await assertFullAdmin(context.supabase);
@@ -31,6 +32,13 @@ export const createAdminUser = createServerFn({ method: "POST" })
       p_role: data.role,
     });
     if (error || !res?.ok) throw new Error("Не удалось сохранить администратора");
+
+    if (data.name) {
+      await (context.supabase as any).rpc("admin_set_name", {
+        p_user_id: userId,
+        p_name: data.name,
+      });
+    }
 
     await sendPasswordEmail(data.email, password);
     return { ok: true, email: data.email };
@@ -49,6 +57,14 @@ export const resetAdminPassword = createServerFn({ method: "POST" })
 
     const { resetAuthPassword, sendPasswordEmail } = await import("./admins.server");
     const result = await resetAuthPassword(data.userId, data.email);
+
+    await (context.supabase as any).rpc("log_activity", {
+      p_action: "admin_password_reset",
+      p_entity: "admin_users",
+      p_object_id: data.userId,
+      p_object_label: data.email,
+      p_details: {},
+    });
 
     if (result.password) {
       await (context.supabase as any).rpc("admin_mark_temp_password", { p_user_id: data.userId });
@@ -104,7 +120,9 @@ export const listAdminUsers = createServerFn({ method: "POST" })
     await assertFullAdmin(context.supabase);
     const { data, error } = await context.supabase
       .from("admin_users" as any)
-      .select("user_id, email, role, active, must_change_password, created_at")
+      .select(
+        "user_id, email, name, avatar_url, role, active, must_change_password, created_at, last_login_at",
+      )
       .order("created_at");
     if (error) throw new Error("Не удалось загрузить список");
     return { rows: (data ?? []) as any[], selfId: context.userId };
@@ -132,5 +150,50 @@ export const completePasswordChange = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await (context.supabase as any).rpc("admin_password_changed");
+    return { ok: true };
+  });
+
+export const deleteAdminUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { userId: string }) => {
+    const userId = clean(input?.userId, 64);
+    if (!userId) throw new Error("Пользователь не найден");
+    return { userId };
+  })
+  .handler(async ({ data, context }) => {
+    await assertFullAdmin(context.supabase);
+
+    const { data: res, error } = await (context.supabase as any).rpc("admin_delete_user", {
+      p_user_id: data.userId,
+    });
+    if (error) throw new Error("Не удалось удалить администратора");
+    if (!res?.ok) {
+      const map: Record<string, string> = {
+        forbidden: "Недостаточно прав",
+        self: "Нельзя удалить самого себя",
+        last_admin: "Нельзя удалить последнего администратора с полными правами",
+        not_found: "Пользователь не найден",
+      };
+      throw new Error(map[res?.error as string] ?? "Не удалось удалить администратора");
+    }
+
+    const { deleteAuthUser } = await import("./admins.server");
+    await deleteAuthUser(data.userId);
+    return { ok: true };
+  });
+
+export const setAdminName = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { userId: string; name: string }) => ({
+    userId: clean(input?.userId, 64),
+    name: clean(input?.name, 80),
+  }))
+  .handler(async ({ data, context }) => {
+    await assertFullAdmin(context.supabase);
+    const { error } = await (context.supabase as any).rpc("admin_set_name", {
+      p_user_id: data.userId,
+      p_name: data.name,
+    });
+    if (error) throw new Error("Не удалось сохранить имя");
     return { ok: true };
   });

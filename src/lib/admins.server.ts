@@ -151,3 +151,11 @@ export async function sendPasswordEmail(
     throw new Error("Не удалось отправить письмо с паролем");
   }
 }
+
+/** Best-effort removal of the auth user (needs a service-role key). */
+export async function deleteAuthUser(userId: string) {
+  const admin = adminAuthClient();
+  if (!admin) return { removed: false as const };
+  const { error } = await admin.auth.admin.deleteUser(userId);
+  return { removed: !error };
+}
