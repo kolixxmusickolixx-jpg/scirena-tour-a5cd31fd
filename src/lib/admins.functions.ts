@@ -12,12 +12,13 @@ async function assertFullAdmin(supabase: any) {
 
 export const createAdminUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { email: string; role: string }) => {
+  .inputValidator((input: { email: string; role: string; name?: string }) => {
     const email = clean(input?.email, 160).toLowerCase();
     const role = clean(input?.role, 20);
+    const name = clean(input?.name, 80);
     if (!isEmail(email)) throw new Error("Укажите корректный email");
     if (!ROLES.includes(role)) throw new Error("Выберите роль");
-    return { email, role };
+    return { email, role, name };
   })
   .handler(async ({ data, context }) => {
     await assertFullAdmin(context.supabase);
@@ -31,6 +32,13 @@ export const createAdminUser = createServerFn({ method: "POST" })
       p_role: data.role,
     });
     if (error || !res?.ok) throw new Error("Не удалось сохранить администратора");
+
+    if (data.name) {
+      await (context.supabase as any).rpc("admin_set_name", {
+        p_user_id: userId,
+        p_name: data.name,
+      });
+    }
 
     await sendPasswordEmail(data.email, password);
     return { ok: true, email: data.email };
