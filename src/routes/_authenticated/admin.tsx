@@ -183,6 +183,7 @@ function AdminPage() {
   };
 
   async function signOut() {
+    await logActivity("logout", "auth");
     await qc.cancelQueries();
     qc.clear();
     try {

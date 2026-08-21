@@ -99,6 +99,8 @@ function AuthPage() {
         throw inner;
       }
       passwordRef.current = "";
+      await supabase.rpc("admin_touch_login");
+      await logActivity("login", "auth");
       navigate({ to: "/admin", replace: true });
     } catch (e) {
       setError(errText(e));
