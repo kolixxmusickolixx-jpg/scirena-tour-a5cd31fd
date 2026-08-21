@@ -20,17 +20,20 @@ import {
   BarChart3,
   Users,
   Clapperboard,
+  ScrollText,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminTwoFactor, revokeAdminTwoFactor } from "@/lib/twofa.functions";
 import { getMyAdminAccess, completePasswordChange } from "@/lib/admins.functions";
 import { allowedSections, roleLabel } from "@/lib/roles";
+import { logActivity } from "@/lib/activity";
 
 import { signPaths, galleryKeys } from "@/lib/gallery";
 import { SupportTab } from "@/components/admin/SupportTab";
 import { ReleasesTab } from "@/components/admin/ReleasesTab";
 import { AnalyticsTab } from "@/components/admin/AnalyticsTab";
 import { AdminsTab } from "@/components/admin/AdminsTab";
+import { ActivityTab } from "@/components/admin/ActivityTab";
 import { MediaTab } from "@/components/admin/MediaTab";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -72,7 +75,8 @@ type Tab =
   | "gallery"
   | "media"
   | "support"
-  | "admins";
+  | "admins"
+  | "activity";
 
 const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[] = [
   { id: "analytics", label: "Аналитика", icon: BarChart3, hint: "Посещаемость и источники" },
@@ -85,7 +89,9 @@ const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[
   { id: "media", label: "Медиа", icon: Clapperboard, hint: "Видео и клипы" },
   { id: "support", label: "Обращения", icon: Inbox, hint: "Переписка с клиентами" },
   { id: "admins", label: "Администраторы", icon: Users, hint: "Доступы и роли" },
+  { id: "activity", label: "Журнал действий", icon: ScrollText, hint: "История всех операций" },
 ];
+
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -177,6 +183,7 @@ function AdminPage() {
   };
 
   async function signOut() {
+    await logActivity("logout", "auth");
     await qc.cancelQueries();
     qc.clear();
     try {
@@ -236,6 +243,8 @@ function AdminPage() {
     media: null,
     support: null,
     admins: null,
+    activity: null,
+
   };
 
 
@@ -338,6 +347,8 @@ function AdminPage() {
             {tab === "media" && <MediaTab />}
             {tab === "support" && <SupportTab />}
             {tab === "admins" && <AdminsTab />}
+            {tab === "activity" && <ActivityTab />}
+
           </div>
         </main>
       </div>

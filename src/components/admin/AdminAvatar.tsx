@@ -3,7 +3,7 @@ import { initials } from "@/lib/activity";
 type Props = {
   name?: string | null;
   email?: string | null;
-  url?: string | null;
+  url?: string | null | undefined;
   size?: number;
 };
 
