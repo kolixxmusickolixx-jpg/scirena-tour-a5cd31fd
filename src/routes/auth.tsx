@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   startAdminLogin,
   resendAdminCode,
+import { logActivity } from "@/lib/activity";
   verifyAdminCode,
   claimAdminGrant,
   checkAdminTwoFactor,
