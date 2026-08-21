@@ -10,6 +10,7 @@ import {
   type Release,
 } from "@/lib/releases";
 import { PlatformIcon } from "@/components/releases/PlatformIcon";
+import { SortableList } from "@/components/admin/SortableList";
 
 const inputCls =
   "w-full rounded-xl border border-border bg-secondary/40 px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40 focus:bg-secondary/60";
@@ -55,14 +56,27 @@ export function ReleasesTab() {
         </div>
       )}
 
-      {rows.map((row) => (
-        <ReleaseRowCard key={row.id} row={row} onChange={refresh} />
-      ))}
+      <SortableList
+        items={rows}
+        table="releases"
+        onSaved={refresh}
+        renderItem={(row, handle) => (
+          <ReleaseRowCard row={row} onChange={refresh} handle={handle} />
+        )}
+      />
     </div>
   );
 }
 
-function ReleaseRowCard({ row, onChange }: { row: Release; onChange: () => void }) {
+function ReleaseRowCard({
+  row,
+  onChange,
+  handle,
+}: {
+  row: Release;
+  onChange: () => void;
+  handle?: React.ReactNode;
+}) {
   const [draft, setDraft] = useState(row);
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
@@ -85,7 +99,6 @@ function ReleaseRowCard({ row, onChange }: { row: Release; onChange: () => void 
         apple_url: draft.apple_url,
         vk_url: draft.vk_url,
         published: draft.published,
-        sort_order: draft.sort_order,
       })
       .eq("id", row.id);
     setBusy(false);
@@ -181,7 +194,8 @@ function ReleaseRowCard({ row, onChange }: { row: Release; onChange: () => void 
         </div>
 
         <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_160px_110px]">
+          {handle && <div className="flex">{handle}</div>}
+          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_160px]">
             <div>
               <label className={labelCls}>НАЗВАНИЕ</label>
               <input
@@ -200,15 +214,6 @@ function ReleaseRowCard({ row, onChange }: { row: Release; onChange: () => void 
                 <option value="single">Сингл</option>
                 <option value="album">Альбом</option>
               </select>
-            </div>
-            <div>
-              <label className={labelCls}>ПОРЯДОК</label>
-              <input
-                type="number"
-                className={inputCls}
-                value={draft.sort_order}
-                onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) })}
-              />
             </div>
           </div>
 
