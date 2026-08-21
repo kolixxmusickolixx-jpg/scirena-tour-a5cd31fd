@@ -48,8 +48,8 @@ export function DragHandle({
   listeners,
   compact,
 }: {
-  attributes: Record<string, unknown>;
-  listeners: Record<string, unknown> | undefined;
+  attributes: Record<string, any>;
+  listeners: Record<string, any> | undefined;
   compact?: boolean;
 }) {
   return (
@@ -137,7 +137,7 @@ export function SortableList<T extends Item>({
     setOrder(next);
     savingRef.current = true;
 
-    const { error } = await supabase.rpc("reorder_items", {
+    const { error } = await (supabase.rpc as any)("reorder_items", {
       p_table: table,
       p_ids: next.map((i) => i.id),
     });
@@ -156,7 +156,7 @@ export function SortableList<T extends Item>({
       id={dndId}
       sensors={sensors}
       collisionDetection={closestCenter}
-      modifiers={layout === "list" ? [restrictToVerticalAxis, restrictToParentElement] : undefined}
+      modifiers={layout === "list" ? [restrictToVerticalAxis, restrictToParentElement] : []}
       onDragEnd={handleDragEnd}
     >
       <SortableContext
