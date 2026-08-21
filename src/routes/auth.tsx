@@ -4,12 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   startAdminLogin,
   resendAdminCode,
-import { logActivity } from "@/lib/activity";
   verifyAdminCode,
   claimAdminGrant,
   checkAdminTwoFactor,
 } from "@/lib/twofa.functions";
 
+import { logActivity } from "@/lib/activity";
 export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({
