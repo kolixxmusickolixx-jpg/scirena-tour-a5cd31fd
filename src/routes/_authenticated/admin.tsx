@@ -242,6 +242,8 @@ function AdminPage() {
     media: null,
     support: null,
     admins: null,
+    activity: null,
+
   };
 
 
