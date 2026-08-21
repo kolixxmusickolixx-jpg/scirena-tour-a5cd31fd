@@ -667,6 +667,10 @@ export type Database = {
         }
         Returns: Json
       }
+      reorder_items: {
+        Args: { p_ids: string[]; p_table: string }
+        Returns: undefined
+      }
       support_create_ticket: {
         Args: { p_email: string; p_message: string; p_name: string }
         Returns: Json

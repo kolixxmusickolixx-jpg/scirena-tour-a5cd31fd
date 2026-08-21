@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Plus, Save, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SortableList } from "@/components/admin/SortableList";
 
 const inputCls =
   "w-full rounded-xl border border-border bg-secondary/40 px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40 focus:bg-secondary/60";
@@ -73,9 +74,12 @@ export function MediaTab() {
         <Plus size={14} /> ДОБАВИТЬ МАТЕРИАЛ
       </button>
 
-      {rows.map((row) => (
-        <MediaCard key={row.id} row={row} onRun={run} />
-      ))}
+      <SortableList
+        items={rows}
+        table="media_items"
+        onSaved={refresh}
+        renderItem={(row, handle) => <MediaCard row={row} onRun={run} handle={handle} />}
+      />
 
       {!media.isLoading && rows.length === 0 && (
         <div className="rounded-2xl border border-dashed border-border py-14 text-center text-[0.65rem] tracking-[0.25em] text-muted-foreground">
@@ -89,9 +93,11 @@ export function MediaTab() {
 function MediaCard({
   row,
   onRun,
+  handle,
 }: {
   row: MediaRow;
   onRun: (p: PromiseLike<{ error: { message: string } | null }>, msg: string) => void;
+  handle?: React.ReactNode;
 }) {
   return (
     <form
@@ -109,13 +115,13 @@ function MediaCard({
               thumb_url: String(f.get("thumb_url") ?? ""),
               kind: String(f.get("kind") ?? "video"),
               published: f.get("published") === "on",
-              sort_order: Number(f.get("sort_order") ?? 0),
             } as any)
             .eq("id", row.id),
           "Сохранено",
         );
       }}
     >
+      {handle && <div className="flex">{handle}</div>}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label className={labelCls}>НАЗВАНИЕ</label>
@@ -147,15 +153,6 @@ function MediaCard({
               </option>
             ))}
           </select>
-        </div>
-        <div>
-          <label className={labelCls}>ПОРЯДОК</label>
-          <input
-            name="sort_order"
-            type="number"
-            defaultValue={row.sort_order}
-            className={inputCls}
-          />
         </div>
       </div>
 

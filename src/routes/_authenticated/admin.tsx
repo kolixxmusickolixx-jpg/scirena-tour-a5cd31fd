@@ -23,6 +23,7 @@ import {
   ScrollText,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SortableList } from "@/components/admin/SortableList";
 import { checkAdminTwoFactor, revokeAdminTwoFactor } from "@/lib/twofa.functions";
 import { getMyAdminAccess, completePasswordChange } from "@/lib/admins.functions";
 import { allowedSections, roleLabel } from "@/lib/roles";
@@ -491,14 +492,25 @@ function ShowsTab({ rows, onChange }: { rows: ShowRow[]; onChange: () => void })
       </button>
 
       {rows.length === 0 && <EmptyState text="КОНЦЕРТОВ ПОКА НЕТ" />}
-      {rows.map((row) => (
-        <ShowCard key={row.id} row={row} onChange={onChange} />
-      ))}
+      <SortableList
+        items={rows}
+        table="shows"
+        onSaved={onChange}
+        renderItem={(row, handle) => <ShowCard row={row} onChange={onChange} handle={handle} />}
+      />
     </div>
   );
 }
 
-function ShowCard({ row, onChange }: { row: ShowRow; onChange: () => void }) {
+function ShowCard({
+  row,
+  onChange,
+  handle,
+}: {
+  row: ShowRow;
+  onChange: () => void;
+  handle?: React.ReactNode;
+}) {
   const [draft, setDraft] = useState(row);
   const save = useSaver(onChange);
   useEffect(() => setDraft(row), [row]);
@@ -508,7 +520,10 @@ function ShowCard({ row, onChange }: { row: ShowRow; onChange: () => void }) {
   return (
     <div className={`${cardCls} space-y-4`}>
       <div className="flex items-center justify-between gap-3">
-        <p className="font-display truncate text-base font-bold">{draft.city || "Без города"}</p>
+        {handle}
+        <p className="font-display mr-auto truncate text-base font-bold">
+          {draft.city || "Без города"}
+        </p>
         <span className="shrink-0 rounded-full bg-secondary px-3 py-1 text-[0.55rem] tracking-[0.2em] text-muted-foreground">
           {draft.status.toUpperCase()}
         </span>
@@ -556,15 +571,6 @@ function ShowCard({ row, onChange }: { row: ShowRow; onChange: () => void }) {
             onChange={(e) => set("ticket_url", e.target.value)}
           />
         </label>
-        <label className="block">
-          <span className={labelCls}>ПОРЯДОК</span>
-          <input
-            type="number"
-            className={inputCls}
-            value={draft.sort_order}
-            onChange={(e) => set("sort_order", Number(e.target.value))}
-          />
-        </label>
       </div>
       <div className="flex flex-wrap gap-3">
         <button
@@ -581,7 +587,6 @@ function ShowCard({ row, onChange }: { row: ShowRow; onChange: () => void }) {
                     day_label: draft.day_label,
                     status: draft.status,
                     ticket_url: draft.ticket_url,
-                    sort_order: draft.sort_order,
                   })
                   .eq("id", row.id),
               "Сохранено",
@@ -627,20 +632,32 @@ function FaqTab({ rows, onChange }: { rows: FaqRow[]; onChange: () => void }) {
         <Plus size={14} /> ДОБАВИТЬ ВОПРОС
       </button>
       {rows.length === 0 && <EmptyState text="ВОПРОСОВ ПОКА НЕТ" />}
-      {rows.map((row) => (
-        <FaqCard key={row.id} row={row} onChange={onChange} />
-      ))}
+      <SortableList
+        items={rows}
+        table="faq_items"
+        onSaved={onChange}
+        renderItem={(row, handle) => <FaqCard row={row} onChange={onChange} handle={handle} />}
+      />
     </div>
   );
 }
 
-function FaqCard({ row, onChange }: { row: FaqRow; onChange: () => void }) {
+function FaqCard({
+  row,
+  onChange,
+  handle,
+}: {
+  row: FaqRow;
+  onChange: () => void;
+  handle?: React.ReactNode;
+}) {
   const [draft, setDraft] = useState(row);
   const save = useSaver(onChange);
   useEffect(() => setDraft(row), [row]);
 
   return (
     <div className={`${cardCls} space-y-3`}>
+      {handle && <div className="flex">{handle}</div>}
       <label className="block">
         <span className={labelCls}>ВОПРОС</span>
         <input
@@ -658,17 +675,8 @@ function FaqCard({ row, onChange }: { row: FaqRow; onChange: () => void }) {
         />
       </label>
       <div className="flex flex-wrap items-center gap-3">
-        <label className="block">
-          <span className={labelCls}>ПОРЯДОК</span>
-          <input
-            type="number"
-            className={`${inputCls} w-24`}
-            value={draft.sort_order}
-            onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) })}
-          />
-        </label>
         <button
-          className={`${btnCls} mt-5`}
+          className={btnCls}
           onClick={() =>
             save(
               () =>
@@ -677,7 +685,6 @@ function FaqCard({ row, onChange }: { row: FaqRow; onChange: () => void }) {
                   .update({
                     question: draft.question,
                     answer: draft.answer,
-                    sort_order: draft.sort_order,
                   })
                   .eq("id", row.id),
               "Сохранено",
@@ -687,7 +694,7 @@ function FaqCard({ row, onChange }: { row: FaqRow; onChange: () => void }) {
           <Save size={14} /> СОХРАНИТЬ
         </button>
         <button
-          className={`${ghostCls} mt-5`}
+          className={ghostCls}
           onClick={() => {
             if (!confirm("Удалить вопрос?")) return;
             save(() => supabase.from("faq_items").delete().eq("id", row.id), "Удалено");
@@ -723,20 +730,32 @@ function SocialsTab({ rows, onChange }: { rows: SocialRow[]; onChange: () => voi
         <Plus size={14} /> ДОБАВИТЬ ССЫЛКУ
       </button>
       {rows.length === 0 && <EmptyState text="ССЫЛОК ПОКА НЕТ" />}
-      {rows.map((row) => (
-        <SocialCard key={row.id} row={row} onChange={onChange} />
-      ))}
+      <SortableList
+        items={rows}
+        table="social_links"
+        onSaved={onChange}
+        renderItem={(row, handle) => <SocialCard row={row} onChange={onChange} handle={handle} />}
+      />
     </div>
   );
 }
 
-function SocialCard({ row, onChange }: { row: SocialRow; onChange: () => void }) {
+function SocialCard({
+  row,
+  onChange,
+  handle,
+}: {
+  row: SocialRow;
+  onChange: () => void;
+  handle?: React.ReactNode;
+}) {
   const [draft, setDraft] = useState(row);
   const save = useSaver(onChange);
   useEffect(() => setDraft(row), [row]);
 
   return (
-    <div className={`${cardCls} grid gap-3 sm:grid-cols-[1fr_2fr_auto] sm:items-end`}>
+    <div className={`${cardCls} grid gap-3 sm:grid-cols-[auto_1fr_2fr_auto] sm:items-end`}>
+      {handle && <div className="flex sm:pb-2">{handle}</div>}
       <label className="block">
         <span className={labelCls}>НАЗВАНИЕ</span>
         <input
@@ -761,7 +780,7 @@ function SocialCard({ row, onChange }: { row: SocialRow; onChange: () => void })
               () =>
                 supabase
                   .from("social_links")
-                  .update({ label: draft.label, url: draft.url, sort_order: draft.sort_order })
+                  .update({ label: draft.label, url: draft.url })
                   .eq("id", row.id),
               "Сохранено",
             )
@@ -925,14 +944,25 @@ function GalleryTab() {
         <Plus size={14} /> СОЗДАТЬ АЛЬБОМ
       </button>
       {rows.length === 0 && <EmptyState text="АЛЬБОМОВ ПОКА НЕТ" />}
-      {rows.map((row) => (
-        <AlbumCard key={row.id} row={row} onChange={refresh} />
-      ))}
+      <SortableList
+        items={rows}
+        table="gallery_albums"
+        onSaved={refresh}
+        renderItem={(row, handle) => <AlbumCard row={row} onChange={refresh} handle={handle} />}
+      />
     </div>
   );
 }
 
-function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
+function AlbumCard({
+  row,
+  onChange,
+  handle,
+}: {
+  row: AlbumRow;
+  onChange: () => void;
+  handle?: React.ReactNode;
+}) {
   const [draft, setDraft] = useState(row);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
@@ -1047,13 +1077,16 @@ function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
   return (
     <div className={`${cardCls} space-y-4`}>
       <div className="flex items-center justify-between gap-3">
-        <p className="font-display truncate text-base font-bold">{draft.title || "Без названия"}</p>
+        {handle}
+        <p className="font-display mr-auto truncate text-base font-bold">
+          {draft.title || "Без названия"}
+        </p>
         <span className="shrink-0 rounded-full bg-secondary px-3 py-1 text-[0.55rem] tracking-[0.2em] text-muted-foreground">
           {photoList.length} ФОТО
         </span>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-[2fr_1fr_auto]">
+      <div className="grid gap-3 sm:grid-cols-[2fr_1fr]">
         <label className="block">
           <span className={labelCls}>НАЗВАНИЕ</span>
           <input
@@ -1070,15 +1103,6 @@ function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
             onChange={(e) => setDraft({ ...draft, date_label: e.target.value })}
           />
         </label>
-        <label className="block">
-          <span className={labelCls}>ПОРЯДОК</span>
-          <input
-            type="number"
-            className={`${inputCls} sm:w-24`}
-            value={draft.sort_order}
-            onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) })}
-          />
-        </label>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -1092,7 +1116,6 @@ function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
                   .update({
                     title: draft.title,
                     date_label: draft.date_label,
-                    sort_order: draft.sort_order,
                   })
                   .eq("id", row.id),
               "Сохранено",
@@ -1173,15 +1196,17 @@ function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
 
 
       {photoList.length > 0 && (
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-          {photoList.map((p) => (
-            <div
-              key={p.id}
-              className="relative aspect-square overflow-hidden rounded-xl bg-secondary"
-            >
+        <SortableList
+          items={photoList}
+          table="gallery_photos"
+          layout="grid"
+          onSaved={() => photos.refetch()}
+          renderItem={(p, dragHandle) => (
+            <div className="relative aspect-square overflow-hidden rounded-xl bg-secondary">
               {p.url && (
                 <img src={p.url} alt="" className="h-full w-full object-cover" loading="lazy" />
               )}
+              <div className="absolute top-1 left-1">{dragHandle}</div>
               <button
                 onClick={() => removePhoto(p.id, p.storage_path)}
                 aria-label="Удалить фото"
@@ -1190,8 +1215,8 @@ function AlbumCard({ row, onChange }: { row: AlbumRow; onChange: () => void }) {
                 <Trash2 size={11} />
               </button>
             </div>
-          ))}
-        </div>
+          )}
+        />
       )}
     </div>
   );
