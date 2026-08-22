@@ -115,7 +115,7 @@ function MediaCard({
             .from("media_items" as any)
             .update({
               title: String(f.get("title") ?? ""),
-              description: String(f.get("description") ?? ""),
+              description,
               video_url: String(f.get("video_url") ?? ""),
               thumb_url: String(f.get("thumb_url") ?? ""),
               kind: String(f.get("kind") ?? "video"),
@@ -134,12 +134,7 @@ function MediaCard({
         </div>
         <div className="sm:col-span-2">
           <label className={labelCls}>ОПИСАНИЕ</label>
-          <textarea
-            name="description"
-            defaultValue={row.description}
-            rows={2}
-            className={inputCls}
-          />
+          <RichTextEditor value={description} onChange={setDescription} minHeight={100} />
         </div>
         <div>
           <label className={labelCls}>ССЫЛКА НА ВИДЕО</label>
