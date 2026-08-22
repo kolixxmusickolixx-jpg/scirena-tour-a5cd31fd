@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SortableList } from "@/components/admin/SortableList";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { checkAdminTwoFactor, revokeAdminTwoFactor } from "@/lib/twofa.functions";
 import { getMyAdminAccess, completePasswordChange } from "@/lib/admins.functions";
 import { allowedSections, roleLabel } from "@/lib/roles";
@@ -668,10 +669,9 @@ function FaqCard({
       </label>
       <label className="block">
         <span className={labelCls}>ОТВЕТ</span>
-        <textarea
-          className={`${inputCls} min-h-28`}
+        <RichTextEditor
           value={draft.answer}
-          onChange={(e) => setDraft({ ...draft, answer: e.target.value })}
+          onChange={(html) => setDraft({ ...draft, answer: html })}
         />
       </label>
       <div className="flex flex-wrap items-center gap-3">
@@ -817,6 +817,8 @@ const CONTENT_LABELS: Record<string, string> = {
   privacy_url: "Ссылка на политику конфиденциальности",
 };
 
+const RICH_CONTENT_KEYS = new Set(["bio_p1", "bio_p2", "bio_p3", "bio_p4", "quote"]);
+
 type ContentRow = { key: string; value: string };
 
 function ContentTab({ rows, onChange }: { rows: ContentRow[]; onChange: () => void }) {
@@ -857,22 +859,24 @@ function ContentTab({ rows, onChange }: { rows: ContentRow[]; onChange: () => vo
             </div>
           </div>
         ) : (
+        RICH_CONTENT_KEYS.has(r.key) ? (
+          <div key={r.key}>
+            <span className={labelCls}>{(CONTENT_LABELS[r.key] ?? r.key).toUpperCase()}</span>
+            <RichTextEditor
+              value={draft[r.key] ?? ""}
+              onChange={(html) => setDraft({ ...draft, [r.key]: html })}
+            />
+          </div>
+        ) : (
         <label key={r.key} className="block">
           <span className={labelCls}>{(CONTENT_LABELS[r.key] ?? r.key).toUpperCase()}</span>
-          {(draft[r.key] ?? "").length > 90 ? (
-            <textarea
-              className={`${inputCls} min-h-32`}
-              value={draft[r.key] ?? ""}
-              onChange={(e) => setDraft({ ...draft, [r.key]: e.target.value })}
-            />
-          ) : (
-            <input
-              className={inputCls}
-              value={draft[r.key] ?? ""}
-              onChange={(e) => setDraft({ ...draft, [r.key]: e.target.value })}
-            />
-          )}
+          <input
+            className={inputCls}
+            value={draft[r.key] ?? ""}
+            onChange={(e) => setDraft({ ...draft, [r.key]: e.target.value })}
+          />
         </label>
+        )
         ),
       )}
       <button

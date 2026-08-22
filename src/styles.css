@@ -116,3 +116,38 @@
 @utility text-balance-lux {
   text-wrap: balance;
 }
+
+/* Форматированный текст из админки */
+.rich-text :where(h2, h3, h4) {
+  font-family: var(--font-display);
+  color: var(--color-foreground);
+  line-height: 1.2;
+  margin: 0.8em 0 0.4em;
+}
+.rich-text h2 { font-size: 1.5em; }
+.rich-text h3 { font-size: 1.25em; }
+.rich-text h4 { font-size: 1.1em; }
+.rich-text p { margin: 0 0 0.7em; }
+.rich-text p:last-child { margin-bottom: 0; }
+.rich-text b,
+.rich-text strong { font-weight: 700; color: var(--color-foreground); }
+.rich-text i, .rich-text em { font-style: italic; }
+.rich-text u { text-decoration: underline; }
+.rich-text ul,
+.rich-text ol { margin: 0 0 0.7em; padding-left: 1.3em; }
+.rich-text ul { list-style: disc; }
+.rich-text ol { list-style: decimal; }
+.rich-text li { margin: 0.2em 0; }
+.rich-text blockquote {
+  margin: 0.8em 0;
+  padding-left: 1em;
+  border-left: 2px solid var(--color-border);
+  color: var(--color-muted-foreground);
+  font-style: italic;
+}
+.rich-text a {
+  color: var(--color-foreground);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.rich-text a:hover { opacity: 0.75; }

@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import { Plus, Save, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SortableList } from "@/components/admin/SortableList";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { useEffect, useState } from "react";
 
 const inputCls =
   "w-full rounded-xl border border-border bg-secondary/40 px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40 focus:bg-secondary/60";
@@ -99,6 +101,9 @@ function MediaCard({
   onRun: (p: PromiseLike<{ error: { message: string } | null }>, msg: string) => void;
   handle?: React.ReactNode;
 }) {
+  const [description, setDescription] = useState(row.description ?? "");
+  useEffect(() => setDescription(row.description ?? ""), [row.description]);
+
   return (
     <form
       className={`${cardCls} space-y-4`}
@@ -110,7 +115,7 @@ function MediaCard({
             .from("media_items" as any)
             .update({
               title: String(f.get("title") ?? ""),
-              description: String(f.get("description") ?? ""),
+              description,
               video_url: String(f.get("video_url") ?? ""),
               thumb_url: String(f.get("thumb_url") ?? ""),
               kind: String(f.get("kind") ?? "video"),
@@ -129,12 +134,7 @@ function MediaCard({
         </div>
         <div className="sm:col-span-2">
           <label className={labelCls}>ОПИСАНИЕ</label>
-          <textarea
-            name="description"
-            defaultValue={row.description}
-            rows={2}
-            className={inputCls}
-          />
+          <RichTextEditor value={description} onChange={setDescription} minHeight={100} />
         </div>
         <div>
           <label className={labelCls}>ССЫЛКА НА ВИДЕО</label>

@@ -6,6 +6,7 @@ import { Reveal } from "@/components/Reveal";
 import { ResponsiveImage } from "@/components/ResponsiveImage";
 import { Gallery } from "@/components/Gallery";
 import { Releases } from "@/components/Releases";
+import { RichText } from "@/components/RichText";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -302,7 +303,7 @@ function Bio({ data }: { data: SiteData }) {
           <div className="mt-8 space-y-5 text-sm leading-relaxed text-muted-foreground sm:text-base">
             {[c["bio_p1"], c["bio_p2"], c["bio_p3"], c["bio_p4"]].filter(Boolean).map((p, i) => (
               <Reveal key={i} delay={i * 0.06}>
-                <p>{p}</p>
+                <RichText as="p" value={p} />
               </Reveal>
             ))}
           </div>
@@ -394,9 +395,11 @@ function QuoteScreen({ data }: { data: SiteData }) {
       <div className="veil absolute inset-0 opacity-50" />
       <div className="relative z-10 flex h-full items-center justify-center px-6">
         <Reveal>
-          <p className="font-display max-w-4xl text-center text-xl leading-[1.3] font-semibold text-balance-lux sm:text-4xl sm:leading-[1.25] lg:text-5xl">
-            {data.content["quote"] ?? ""}
-          </p>
+          <RichText
+            as="div"
+            value={data.content["quote"] ?? ""}
+            className="font-display max-w-4xl text-center text-xl leading-[1.3] font-semibold text-balance-lux sm:text-4xl sm:leading-[1.25] lg:text-5xl"
+          />
         </Reveal>
       </div>
     </section>
@@ -436,9 +439,11 @@ function Faq({ data }: { data: SiteData }) {
                       transition={{ duration: 0.5, ease }}
 
                     >
-                      <p className="px-6 pb-6 text-sm leading-relaxed text-muted-foreground">
-                        {item.answer}
-                      </p>
+                      <RichText
+                        as="div"
+                        value={item.answer}
+                        className="px-6 pb-6 text-sm leading-relaxed text-muted-foreground"
+                      />
                     </motion.div>
                   )}
                 </AnimatePresence>
