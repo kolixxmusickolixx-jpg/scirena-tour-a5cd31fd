@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SortableList } from "@/components/admin/SortableList";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { checkAdminTwoFactor, revokeAdminTwoFactor } from "@/lib/twofa.functions";
 import { getMyAdminAccess, completePasswordChange } from "@/lib/admins.functions";
 import { allowedSections, roleLabel } from "@/lib/roles";
