@@ -857,22 +857,24 @@ function ContentTab({ rows, onChange }: { rows: ContentRow[]; onChange: () => vo
             </div>
           </div>
         ) : (
+        RICH_CONTENT_KEYS.has(r.key) ? (
+          <div key={r.key}>
+            <span className={labelCls}>{(CONTENT_LABELS[r.key] ?? r.key).toUpperCase()}</span>
+            <RichTextEditor
+              value={draft[r.key] ?? ""}
+              onChange={(html) => setDraft({ ...draft, [r.key]: html })}
+            />
+          </div>
+        ) : (
         <label key={r.key} className="block">
           <span className={labelCls}>{(CONTENT_LABELS[r.key] ?? r.key).toUpperCase()}</span>
-          {(draft[r.key] ?? "").length > 90 ? (
-            <textarea
-              className={`${inputCls} min-h-32`}
-              value={draft[r.key] ?? ""}
-              onChange={(e) => setDraft({ ...draft, [r.key]: e.target.value })}
-            />
-          ) : (
-            <input
-              className={inputCls}
-              value={draft[r.key] ?? ""}
-              onChange={(e) => setDraft({ ...draft, [r.key]: e.target.value })}
-            />
-          )}
+          <input
+            className={inputCls}
+            value={draft[r.key] ?? ""}
+            onChange={(e) => setDraft({ ...draft, [r.key]: e.target.value })}
+          />
         </label>
+        )
         ),
       )}
       <button
