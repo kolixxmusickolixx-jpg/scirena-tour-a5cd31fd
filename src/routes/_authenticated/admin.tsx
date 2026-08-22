@@ -669,10 +669,9 @@ function FaqCard({
       </label>
       <label className="block">
         <span className={labelCls}>ОТВЕТ</span>
-        <textarea
-          className={`${inputCls} min-h-28`}
+        <RichTextEditor
           value={draft.answer}
-          onChange={(e) => setDraft({ ...draft, answer: e.target.value })}
+          onChange={(html) => setDraft({ ...draft, answer: html })}
         />
       </label>
       <div className="flex flex-wrap items-center gap-3">
