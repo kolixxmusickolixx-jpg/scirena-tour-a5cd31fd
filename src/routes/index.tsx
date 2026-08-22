@@ -395,9 +395,11 @@ function QuoteScreen({ data }: { data: SiteData }) {
       <div className="veil absolute inset-0 opacity-50" />
       <div className="relative z-10 flex h-full items-center justify-center px-6">
         <Reveal>
-          <p className="font-display max-w-4xl text-center text-xl leading-[1.3] font-semibold text-balance-lux sm:text-4xl sm:leading-[1.25] lg:text-5xl">
-            {data.content["quote"] ?? ""}
-          </p>
+          <RichText
+            as="div"
+            value={data.content["quote"] ?? ""}
+            className="font-display max-w-4xl text-center text-xl leading-[1.3] font-semibold text-balance-lux sm:text-4xl sm:leading-[1.25] lg:text-5xl"
+          />
         </Reveal>
       </div>
     </section>
