@@ -817,6 +817,8 @@ const CONTENT_LABELS: Record<string, string> = {
   privacy_url: "Ссылка на политику конфиденциальности",
 };
 
+const RICH_CONTENT_KEYS = new Set(["bio_p1", "bio_p2", "bio_p3", "bio_p4", "quote"]);
+
 type ContentRow = { key: string; value: string };
 
 function ContentTab({ rows, onChange }: { rows: ContentRow[]; onChange: () => void }) {
