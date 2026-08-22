@@ -101,6 +101,9 @@ function MediaCard({
   onRun: (p: PromiseLike<{ error: { message: string } | null }>, msg: string) => void;
   handle?: React.ReactNode;
 }) {
+  const [description, setDescription] = useState(row.description ?? "");
+  useEffect(() => setDescription(row.description ?? ""), [row.description]);
+
   return (
     <form
       className={`${cardCls} space-y-4`}
