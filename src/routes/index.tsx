@@ -135,6 +135,8 @@ function Nav() {
 function Hero({ heroRef, scale, y, fade, data }: any) {
   const c = (data as SiteData).content;
   const isVideo = (c["hero_media"] ?? "photo") === "video";
+  const videoSrc = c["hero_video_url"] || "/video/hero.mp4";
+  const customImage = c["hero_image_url"] || "";
   const videoRef = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
 
@@ -143,7 +145,7 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
       {isVideo ? (
         <motion.video
           ref={videoRef}
-          src="/video/hero.mp4"
+          src={videoSrc}
           autoPlay
           loop
           muted={muted}
@@ -151,6 +153,15 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
           preload="auto"
           style={{ scale, y, willChange: "transform", backfaceVisibility: "hidden" }}
           className="absolute inset-0 h-full w-full object-cover object-center opacity-70 transform-gpu"
+        />
+      ) : customImage ? (
+        <motion.img
+          src={customImage}
+          alt="SCIRENA — тур УЕЗЖАЕМ ОСТАЁМСЯ? 2026"
+          decoding="async"
+          fetchPriority="high"
+          style={{ scale, y, willChange: "transform", backfaceVisibility: "hidden" }}
+          className="absolute inset-0 h-full w-full object-cover object-[60%_30%] opacity-70 transform-gpu"
         />
       ) : (
         <ResponsiveImage
@@ -162,6 +173,7 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
           className="absolute inset-0 h-full w-full object-cover object-[60%_30%] opacity-70 transform-gpu"
         />
       )}
+
 
       <div className="veil absolute inset-0" />
       {isVideo && (
