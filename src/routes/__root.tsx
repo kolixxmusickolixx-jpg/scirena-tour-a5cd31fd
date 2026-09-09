@@ -143,12 +143,21 @@ function RootComponent() {
     trackPageView(pathname);
   }, [pathname]);
 
-  return (
-    <QueryClientProvider client={queryClient}>
+  const isAdminArea = pathname.startsWith("/admin") || pathname.startsWith("/auth");
+
+  const content = (
+    <>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       {!hideSupport && <SupportWidget />}
+    </>
+  );
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      {isAdminArea ? content : <MaintenanceGate>{content}</MaintenanceGate>}
       <Toaster />
     </QueryClientProvider>
   );
 }
+
