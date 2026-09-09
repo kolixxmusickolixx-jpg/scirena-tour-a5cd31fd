@@ -836,7 +836,34 @@ function ContentTab({ rows, onChange }: { rows: ContentRow[]; onChange: () => vo
   return (
     <div className={`${cardCls} space-y-4`}>
       {rows.map((r) =>
-        r.key === "hero_media" ? (
+        r.key === "maintenance_mode" ? (
+          <div key={r.key}>
+            <span className={labelCls}>{(CONTENT_LABELS[r.key] ?? r.key).toUpperCase()}</span>
+            <div className="inline-flex rounded-xl border border-border bg-secondary/40 p-1">
+              {[
+                { v: "off", l: "ВЫКЛ" },
+                { v: "on", l: "ВКЛ" },
+              ].map((o) => (
+                <button
+                  key={o.v}
+                  type="button"
+                  onClick={() => setDraft({ ...draft, maintenance_mode: o.v })}
+                  className={`rounded-lg px-4 py-2 text-[0.65rem] font-semibold tracking-[0.18em] transition-colors ${
+                    (draft["maintenance_mode"] ?? "off") === o.v
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {o.l}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-[0.65rem] leading-relaxed text-muted-foreground">
+              При включении обычные посетители видят заглушку. Вошедшие в админ-панель видят сайт как
+              обычно.
+            </p>
+          </div>
+        ) : r.key === "hero_media" ? (
           <div key={r.key}>
             <span className={labelCls}>{(CONTENT_LABELS[r.key] ?? r.key).toUpperCase()}</span>
             <div className="inline-flex rounded-xl border border-border bg-secondary/40 p-1">
@@ -860,6 +887,7 @@ function ContentTab({ rows, onChange }: { rows: ContentRow[]; onChange: () => vo
             </div>
           </div>
         ) : (
+
         RICH_CONTENT_KEYS.has(r.key) ? (
           <div key={r.key}>
             <span className={labelCls}>{(CONTENT_LABELS[r.key] ?? r.key).toUpperCase()}</span>
