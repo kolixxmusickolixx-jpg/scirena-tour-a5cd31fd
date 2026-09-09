@@ -58,6 +58,22 @@ export const getSiteData = createServerFn({ method: "GET" }).handler(async (): P
   const content: Record<string, string> = {};
   for (const row of contentRes.data ?? []) content[row.key] = row.value;
 
+  const mediaPaths = [content["hero_image_path"], content["hero_video_path"]].filter(
+    (p): p is string => typeof p === "string" && p.length > 0,
+  );
+  if (mediaPaths.length > 0) {
+    const { data: signed } = await supabase.storage
+      .from("site-media")
+      .createSignedUrls(mediaPaths, 60 * 60 * 24 * 7);
+    const map: Record<string, string> = {};
+    for (const item of signed ?? []) {
+      if (item?.path && item?.signedUrl) map[item.path] = item.signedUrl;
+    }
+    if (content["hero_image_path"]) content["hero_image_url"] = map[content["hero_image_path"]] ?? "";
+    if (content["hero_video_path"]) content["hero_video_url"] = map[content["hero_video_path"]] ?? "";
+  }
+
+
   return {
     shows: showsRes.data ?? [],
     faq: faqRes.data ?? [],
