@@ -12,6 +12,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
 import { SupportWidget } from "@/components/SupportWidget";
+import { MaintenanceGate } from "@/components/MaintenanceGate";
 import { initAnalytics, trackPageView } from "@/lib/analytics-client";
 
 import appCss from "../styles.css?url";

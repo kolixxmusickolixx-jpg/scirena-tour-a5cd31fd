@@ -803,6 +803,7 @@ function SocialCard({
 }
 
 const CONTENT_LABELS: Record<string, string> = {
+  maintenance_mode: "Технические работы",
   hero_media: "Фон Hero",
   hero_artist: "Имя артиста (шапка)",
   hero_title_line1: "Заголовок — строка 1",
