@@ -1,0 +1,1 @@
+INSERT INTO public.site_content (key, value) VALUES ('maintenance_mode', 'off') ON CONFLICT (key) DO NOTHING;

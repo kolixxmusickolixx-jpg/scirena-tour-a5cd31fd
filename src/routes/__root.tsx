@@ -12,6 +12,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
 import { SupportWidget } from "@/components/SupportWidget";
+import { MaintenanceGate } from "@/components/MaintenanceGate";
 import { initAnalytics, trackPageView } from "@/lib/analytics-client";
 
 import appCss from "../styles.css?url";
@@ -143,12 +144,21 @@ function RootComponent() {
     trackPageView(pathname);
   }, [pathname]);
 
-  return (
-    <QueryClientProvider client={queryClient}>
+  const isAdminArea = pathname.startsWith("/admin") || pathname.startsWith("/auth");
+
+  const content = (
+    <>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       {!hideSupport && <SupportWidget />}
+    </>
+  );
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      {isAdminArea ? content : <MaintenanceGate>{content}</MaintenanceGate>}
       <Toaster />
     </QueryClientProvider>
   );
 }
+
