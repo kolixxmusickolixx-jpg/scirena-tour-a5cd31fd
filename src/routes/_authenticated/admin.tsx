@@ -39,6 +39,7 @@ import { AdminsTab } from "@/components/admin/AdminsTab";
 import { ActivityTab } from "@/components/admin/ActivityTab";
 import { MediaTab } from "@/components/admin/MediaTab";
 import { SystemTab, SYSTEM_KEYS } from "@/components/admin/SystemTab";
+import { IMAGE_ACCEPT } from "@/lib/file-accept";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -1174,7 +1175,7 @@ function AlbumCard({
           {busy ? `ЗАГРУЗКА ${progress ?? ""}` : "ВЫБРАТЬ ФОТО"}
           <input
             type="file"
-            accept="image/*"
+            accept={IMAGE_ACCEPT}
             multiple
             disabled={busy}
             className="hidden"
