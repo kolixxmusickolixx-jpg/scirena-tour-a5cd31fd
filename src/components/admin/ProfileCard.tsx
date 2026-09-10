@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { signAvatars } from "@/lib/activity";
 import { roleLabel } from "@/lib/roles";
 import { AdminAvatar } from "./AdminAvatar";
-import { IMAGE_ACCEPT } from "@/lib/file-accept";
 
 const inputCls =
   "w-full rounded-xl border border-border bg-secondary/40 px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40 focus:bg-secondary/60";
@@ -149,7 +148,6 @@ export function ProfileCard({ onSaved }: { onSaved?: () => void }) {
         <input
           ref={fileRef}
           type="file"
-          accept={IMAGE_ACCEPT}
           hidden
           onChange={(e) => {
             const f = e.target.files?.[0];
