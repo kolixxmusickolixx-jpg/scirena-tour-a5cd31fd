@@ -242,6 +242,7 @@ function AdminPage() {
     analytics: null,
     shows: shows.data?.length ?? null,
     content: content.data?.length ?? null,
+    system: null,
     faq: faq.data?.length ?? null,
     socials: socials.data?.length ?? null,
     releases: null,
@@ -342,7 +343,12 @@ function AdminPage() {
             {tab === "analytics" && <AnalyticsTab />}
             {tab === "shows" && <ShowsTab rows={shows.data ?? []} onChange={() => refresh("shows")} />}
             {tab === "content" && (
-              <ContentTab rows={content.data ?? []} onChange={() => refresh("content")} />
+              <ContentTab
+                rows={(content.data ?? []).filter(
+                  (r: ContentRow) => !(SYSTEM_KEYS as readonly string[]).includes(r.key),
+                )}
+                onChange={() => refresh("content")}
+              />
             )}
             {tab === "faq" && <FaqTab rows={faq.data ?? []} onChange={() => refresh("faq")} />}
             {tab === "socials" && (
