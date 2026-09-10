@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Save, Upload, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { IMAGE_ACCEPT, VIDEO_ACCEPT } from "@/lib/file-accept";
 
 const inputCls =
   "w-full rounded-xl border border-border bg-secondary/40 px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40 focus:bg-secondary/60";
@@ -131,7 +130,6 @@ export function SystemTab() {
         <MediaUploader
           title="ФОТО ФОНА"
           kind="image"
-          accept={IMAGE_ACCEPT}
           maxBytes={PHOTO_MAX}
           recommendation="Рекомендуем: 2560 × 1440 px (или вертикально 1440 × 2160 px), формат JPG или WebP, вес до 8 МБ."
           path={draft["hero_image_path"] ?? ""}
@@ -141,7 +139,6 @@ export function SystemTab() {
         <MediaUploader
           title="ВИДЕО ФОНА"
           kind="video"
-          accept={VIDEO_ACCEPT}
           maxBytes={VIDEO_MAX}
           recommendation="Рекомендуем: 1920 × 1080 px, MP4 (H.264), 24–30 кадров/с, длительность 10–30 сек, вес до 50 МБ (лучше 8–15 МБ для быстрой загрузки)."
           path={draft["hero_video_path"] ?? ""}
@@ -159,7 +156,6 @@ export function SystemTab() {
 function MediaUploader({
   title,
   kind,
-  accept,
   maxBytes,
   recommendation,
   path,
@@ -167,7 +163,6 @@ function MediaUploader({
 }: {
   title: string;
   kind: "image" | "video";
-  accept: string;
   maxBytes: number;
   recommendation: string;
   path: string;
@@ -237,7 +232,6 @@ function MediaUploader({
       <input
         ref={fileRef}
         type="file"
-        accept={accept}
         className="hidden"
         onChange={(e) => {
           const f = e.target.files?.[0];

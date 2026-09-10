@@ -11,7 +11,6 @@ import {
 } from "@/lib/releases";
 import { PlatformIcon } from "@/components/releases/PlatformIcon";
 import { SortableList } from "@/components/admin/SortableList";
-import { IMAGE_ACCEPT } from "@/lib/file-accept";
 
 const inputCls =
   "w-full rounded-xl border border-border bg-secondary/40 px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40 focus:bg-secondary/60";
@@ -183,7 +182,6 @@ function ReleaseRowCard({
             <Upload size={14} /> ОБЛОЖКА
             <input
               type="file"
-              accept={IMAGE_ACCEPT}
               className="hidden"
               disabled={busy}
               onChange={(e) => {
