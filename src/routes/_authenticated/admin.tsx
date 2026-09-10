@@ -21,6 +21,7 @@ import {
   Users,
   Clapperboard,
   ScrollText,
+  Settings,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SortableList } from "@/components/admin/SortableList";
@@ -37,6 +38,7 @@ import { AnalyticsTab } from "@/components/admin/AnalyticsTab";
 import { AdminsTab } from "@/components/admin/AdminsTab";
 import { ActivityTab } from "@/components/admin/ActivityTab";
 import { MediaTab } from "@/components/admin/MediaTab";
+import { SystemTab, SYSTEM_KEYS } from "@/components/admin/SystemTab";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -78,7 +80,8 @@ type Tab =
   | "media"
   | "support"
   | "admins"
-  | "activity";
+  | "activity"
+  | "system";
 
 const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[] = [
   { id: "analytics", label: "Аналитика", icon: BarChart3, hint: "Посещаемость и источники" },
@@ -92,6 +95,7 @@ const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[
   { id: "support", label: "Обращения", icon: Inbox, hint: "Переписка с клиентами" },
   { id: "admins", label: "Администраторы", icon: Users, hint: "Доступы и роли" },
   { id: "activity", label: "Журнал действий", icon: ScrollText, hint: "История всех операций" },
+  { id: "system", label: "Системные настройки", icon: Settings, hint: "Тех. работы и фон Hero" },
 ];
 
 
@@ -350,6 +354,7 @@ function AdminPage() {
             {tab === "support" && <SupportTab />}
             {tab === "admins" && <AdminsTab />}
             {tab === "activity" && <ActivityTab />}
+            {tab === "system" && <SystemTab />}
 
           </div>
         </main>
