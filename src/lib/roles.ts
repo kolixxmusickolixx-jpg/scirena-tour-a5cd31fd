@@ -35,7 +35,7 @@ export function allowedSections(role: string | null | undefined): string[] {
       "media",
       "admins",
       "activity",
-
+      "system",
     ];
   }
   if (role === "photographer") return ["gallery"];
