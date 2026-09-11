@@ -13,6 +13,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { SupportWidget } from "@/components/SupportWidget";
 import { MaintenanceGate } from "@/components/MaintenanceGate";
+import { SiteFonts } from "@/components/SiteFonts";
 import { initAnalytics, trackPageView } from "@/lib/analytics-client";
 
 import appCss from "../styles.css?url";
@@ -156,7 +157,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {isAdminArea ? content : <MaintenanceGate>{content}</MaintenanceGate>}
+      {isAdminArea ? content : (
+        <>
+          <SiteFonts />
+          <MaintenanceGate>{content}</MaintenanceGate>
+        </>
+      )}
       <Toaster />
     </QueryClientProvider>
   );

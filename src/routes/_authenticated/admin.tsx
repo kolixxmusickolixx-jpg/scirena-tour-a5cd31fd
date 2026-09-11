@@ -39,6 +39,8 @@ import { AdminsTab } from "@/components/admin/AdminsTab";
 import { ActivityTab } from "@/components/admin/ActivityTab";
 import { MediaTab } from "@/components/admin/MediaTab";
 import { SystemTab, SYSTEM_KEYS } from "@/components/admin/SystemTab";
+import { FontsTab } from "@/components/admin/FontsTab";
+import { FONTS_CONFIG_KEY } from "@/lib/fonts";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -81,7 +83,8 @@ type Tab =
   | "support"
   | "admins"
   | "activity"
-  | "system";
+  | "system"
+  | "fonts";
 
 const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[] = [
   { id: "analytics", label: "Аналитика", icon: BarChart3, hint: "Посещаемость и источники" },
@@ -96,6 +99,7 @@ const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[
   { id: "admins", label: "Администраторы", icon: Users, hint: "Доступы и роли" },
   { id: "activity", label: "Журнал действий", icon: ScrollText, hint: "История всех операций" },
   { id: "system", label: "Системные настройки", icon: Settings, hint: "Тех. работы и фон Hero" },
+  { id: "fonts", label: "Шрифты", icon: Type, hint: "Шрифты и области применения" },
 ];
 
 
@@ -251,6 +255,8 @@ function AdminPage() {
     support: null,
     admins: null,
     activity: null,
+    fonts: null,
+
 
   };
 
@@ -345,7 +351,9 @@ function AdminPage() {
             {tab === "content" && (
               <ContentTab
                 rows={(content.data ?? []).filter(
-                  (r: ContentRow) => !(SYSTEM_KEYS as readonly string[]).includes(r.key),
+                  (r: ContentRow) =>
+                    !(SYSTEM_KEYS as readonly string[]).includes(r.key) &&
+                    r.key !== FONTS_CONFIG_KEY,
                 )}
                 onChange={() => refresh("content")}
               />
@@ -361,6 +369,7 @@ function AdminPage() {
             {tab === "admins" && <AdminsTab />}
             {tab === "activity" && <ActivityTab />}
             {tab === "system" && <SystemTab />}
+            {tab === "fonts" && <FontsTab />}
 
           </div>
         </main>

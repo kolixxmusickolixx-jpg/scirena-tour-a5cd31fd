@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { FONTS_CONFIG_KEY, FONT_URLS_KEY, parseFontsConfig } from "./fonts";
 
 export type SiteShow = {
   id: string;
@@ -58,9 +59,14 @@ export const getSiteData = createServerFn({ method: "GET" }).handler(async (): P
   const content: Record<string, string> = {};
   for (const row of contentRes.data ?? []) content[row.key] = row.value;
 
-  const mediaPaths = [content["hero_image_path"], content["hero_video_path"]].filter(
-    (p): p is string => typeof p === "string" && p.length > 0,
-  );
+  const fontsConfig = parseFontsConfig(content[FONTS_CONFIG_KEY]);
+  const fontPaths = fontsConfig.custom.map((f) => f.path).filter(Boolean);
+
+  const mediaPaths = [
+    content["hero_image_path"],
+    content["hero_video_path"],
+    ...fontPaths,
+  ].filter((p): p is string => typeof p === "string" && p.length > 0);
   if (mediaPaths.length > 0) {
     const { data: signed } = await supabase.storage
       .from("site-media")
@@ -71,6 +77,11 @@ export const getSiteData = createServerFn({ method: "GET" }).handler(async (): P
     }
     if (content["hero_image_path"]) content["hero_image_url"] = map[content["hero_image_path"]] ?? "";
     if (content["hero_video_path"]) content["hero_video_url"] = map[content["hero_video_path"]] ?? "";
+    if (fontPaths.length > 0) {
+      const fontUrls: Record<string, string> = {};
+      for (const p of fontPaths) if (map[p]) fontUrls[p] = map[p];
+      content[FONT_URLS_KEY] = JSON.stringify(fontUrls);
+    }
   }
 
 
