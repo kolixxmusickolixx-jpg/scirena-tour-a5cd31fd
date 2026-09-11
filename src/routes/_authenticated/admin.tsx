@@ -255,6 +255,8 @@ function AdminPage() {
     support: null,
     admins: null,
     activity: null,
+    fonts: null,
+
 
   };
 
