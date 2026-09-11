@@ -77,6 +77,11 @@ export const getSiteData = createServerFn({ method: "GET" }).handler(async (): P
     }
     if (content["hero_image_path"]) content["hero_image_url"] = map[content["hero_image_path"]] ?? "";
     if (content["hero_video_path"]) content["hero_video_url"] = map[content["hero_video_path"]] ?? "";
+    if (fontPaths.length > 0) {
+      const fontUrls: Record<string, string> = {};
+      for (const p of fontPaths) if (map[p]) fontUrls[p] = map[p];
+      content[FONT_URLS_KEY] = JSON.stringify(fontUrls);
+    }
   }
 
 
