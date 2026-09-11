@@ -58,9 +58,14 @@ export const getSiteData = createServerFn({ method: "GET" }).handler(async (): P
   const content: Record<string, string> = {};
   for (const row of contentRes.data ?? []) content[row.key] = row.value;
 
-  const mediaPaths = [content["hero_image_path"], content["hero_video_path"]].filter(
-    (p): p is string => typeof p === "string" && p.length > 0,
-  );
+  const fontsConfig = parseFontsConfig(content[FONTS_CONFIG_KEY]);
+  const fontPaths = fontsConfig.custom.map((f) => f.path).filter(Boolean);
+
+  const mediaPaths = [
+    content["hero_image_path"],
+    content["hero_video_path"],
+    ...fontPaths,
+  ].filter((p): p is string => typeof p === "string" && p.length > 0);
   if (mediaPaths.length > 0) {
     const { data: signed } = await supabase.storage
       .from("site-media")
