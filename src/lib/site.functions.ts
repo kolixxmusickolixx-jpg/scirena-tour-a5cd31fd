@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { FONTS_CONFIG_KEY, FONT_URLS_KEY, parseFontsConfig } from "./fonts";
 
 export type SiteShow = {
   id: string;
