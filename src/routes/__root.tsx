@@ -14,6 +14,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { SupportWidget } from "@/components/SupportWidget";
 import { MaintenanceGate } from "@/components/MaintenanceGate";
 import { SiteFonts } from "@/components/SiteFonts";
+import { MobileLayout } from "@/components/MobileLayout";
 import { initAnalytics, trackPageView } from "@/lib/analytics-client";
 
 import appCss from "../styles.css?url";
@@ -160,6 +161,7 @@ function RootComponent() {
       {isAdminArea ? content : (
         <>
           <SiteFonts />
+          <MobileLayout />
           <MaintenanceGate>{content}</MaintenanceGate>
         </>
       )}

@@ -109,7 +109,7 @@ function Nav() {
       className="fixed inset-x-0 top-0 z-50"
     >
       <div className="glass mx-auto mt-3 grid w-[94%] max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-full px-5 py-3 sm:flex sm:justify-between">
-        <a href="#top" className="font-display text-sm tracking-[0.35em] text-foreground">
+        <a data-edit-id="nav_logo" href="#top" className="font-display text-sm tracking-[0.35em] text-foreground">
           SCIRENA
         </a>
         <nav className="hidden items-center gap-8 text-xs tracking-[0.2em] text-muted-foreground md:flex">
@@ -122,6 +122,7 @@ function Nav() {
 
         </nav>
         <a
+          data-edit-id="nav_tickets"
           href="#cities"
           className="shrink-0 rounded-full bg-primary px-5 py-2 text-xs font-semibold tracking-[0.16em] text-primary-foreground transition-transform duration-500 hover:scale-105"
         >
@@ -203,12 +204,13 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
             initial={{ opacity: 0, filter: "blur(10px)" }}
             animate={{ opacity: 1, filter: "blur(0px)" }}
             transition={{ duration: 1.2, delay: 0.3, ease }}
+            data-edit-id="hero_artist"
             className="mb-6 text-xs tracking-[0.4em] text-muted-foreground"
           >
             {c["hero_artist"] ?? "SCIRENA"}
           </motion.p>
 
-          <h1 className="font-display text-[clamp(2.6rem,12.8vw,10rem)] leading-[0.9] font-extrabold tracking-[-0.02em] break-words hyphens-none sm:leading-[0.86] lg:text-[8.5vw]">
+          <h1 data-edit-id="hero_title" className="font-display text-[clamp(2.6rem,12.8vw,10rem)] leading-[0.9] font-extrabold tracking-[-0.02em] break-words hyphens-none sm:leading-[0.86] lg:text-[8.5vw]">
             {[c["hero_title_line1"] ?? "УЕЗЖАЕМ", c["hero_title_line2"] ?? "ОСТАЁМСЯ?"].map((word, i) => (
               <span key={word} className="block overflow-hidden">
                 <motion.span
@@ -229,6 +231,7 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, delay: 0.9, ease }}
+                data-edit-id="hero_tour_label"
                 className="font-display text-sm tracking-[0.5em] text-muted-foreground"
               >
                 {c["hero_tour_label"] ?? "ТУР 2026"}
@@ -240,12 +243,14 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
                 className="mt-5 grid grid-cols-1 gap-3 sm:mt-6 sm:flex sm:flex-wrap"
               >
                 <a
+                  data-edit-id="hero_buy"
                   href="#cities"
                   className="rounded-full bg-primary px-8 py-4 text-center text-xs font-semibold tracking-[0.2em] text-primary-foreground transition-all duration-500 hover:scale-[1.04] hover:opacity-90"
                 >
                   КУПИТЬ БИЛЕТ
                 </a>
                 <a
+                  data-edit-id="hero_cities"
                   href="#cities"
                   className="glass rounded-full px-8 py-4 text-center text-xs font-semibold tracking-[0.2em] text-foreground transition-all duration-500 hover:scale-[1.04]"
                 >
@@ -257,6 +262,7 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
               initial={{ opacity: 0, filter: "blur(12px)" }}
               animate={{ opacity: 1, filter: "blur(0px)" }}
               transition={{ duration: 1.4, delay: 1.2, ease }}
+              data-edit-id="hero_note"
               className="max-w-[16rem] text-xs leading-relaxed text-muted-foreground sm:text-sm sm:text-right"
             >
               {c["hero_note"] ?? ""}
@@ -268,11 +274,27 @@ function Hero({ heroRef, scale, y, fade, data }: any) {
   );
 }
 
-function SectionTitle({ kicker, title }: { kicker: string; title: string }) {
+function SectionTitle({
+  kicker,
+  title,
+  editId,
+}: {
+  kicker: string;
+  title: string;
+  editId?: string;
+}) {
   return (
     <Reveal>
-      <p className="mb-4 text-[0.65rem] tracking-[0.4em] text-muted-foreground">{kicker}</p>
-      <h2 className="font-display text-[clamp(1.9rem,8.5vw,3rem)] leading-[1] font-extrabold tracking-tight break-words sm:text-5xl lg:text-6xl">
+      <p
+        data-edit-id={editId ? `${editId}_kicker` : undefined}
+        className="mb-4 text-[0.65rem] tracking-[0.4em] text-muted-foreground"
+      >
+        {kicker}
+      </p>
+      <h2
+        data-edit-id={editId ? `${editId}_title` : undefined}
+        className="font-display text-[clamp(1.9rem,8.5vw,3rem)] leading-[1] font-extrabold tracking-tight break-words sm:text-5xl lg:text-6xl"
+      >
         {title}
       </h2>
     </Reveal>
@@ -311,7 +333,7 @@ function Bio({ data }: { data: SiteData }) {
           </div>
         </Reveal>
         <div>
-          <SectionTitle kicker="ОБ АРТИСТКЕ" title="БИОГРАФИЯ" />
+          <SectionTitle kicker="ОБ АРТИСТКЕ" title="БИОГРАФИЯ" editId="bio" />
           <div className="mt-8 space-y-5 text-sm leading-relaxed text-muted-foreground sm:text-base">
             {[c["bio_p1"], c["bio_p2"], c["bio_p3"], c["bio_p4"]].filter(Boolean).map((p, i) => (
               <Reveal key={i} delay={i * 0.06}>
@@ -331,7 +353,7 @@ function Cities({ data }: { data: SiteData }) {
     return (
       <section id="cities" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
         <div className="mx-auto max-w-7xl">
-          <SectionTitle kicker="ТУР 2027" title="ГОРОДА ТУРА" />
+          <SectionTitle kicker="ТУР 2027" title="ГОРОДА ТУРА" editId="cities" />
           <NoAnnouncements note="Города тура будут опубликованы здесь после анонса. Следите за обновлениями." />
         </div>
       </section>
@@ -339,7 +361,7 @@ function Cities({ data }: { data: SiteData }) {
   return (
     <section id="cities" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
       <div className="mx-auto max-w-7xl">
-        <SectionTitle kicker="ТУР 2027" title="ГОРОДА ТУРА" />
+        <SectionTitle kicker="ТУР 2027" title="ГОРОДА ТУРА" editId="cities" />
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
           {shows.map((s, i) => (
@@ -424,7 +446,7 @@ function Faq({ data }: { data: SiteData }) {
   return (
     <section id="faq" className="relative px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
       <div className="mx-auto max-w-4xl">
-        <SectionTitle kicker="ПОМОЩЬ" title="FAQ" />
+        <SectionTitle kicker="ПОМОЩЬ" title="FAQ" editId="faq" />
         <div className="mt-12 space-y-3">
           {faq.map((item, i) => (
             <Reveal key={item.id} delay={i * 0.06}>
@@ -481,7 +503,7 @@ function Footer({ data }: { data: SiteData }) {
       />
       <div className="relative mx-auto max-w-7xl">
         <Reveal>
-          <p className="font-display text-[clamp(3rem,15vw,11rem)] leading-[0.85] font-extrabold tracking-tight lg:text-[11rem]">
+          <p data-edit-id="footer_logo" className="font-display text-[clamp(3rem,15vw,11rem)] leading-[0.85] font-extrabold tracking-tight lg:text-[11rem]">
             SCIRENA
           </p>
         </Reveal>
