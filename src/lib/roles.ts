@@ -37,6 +37,8 @@ export function allowedSections(role: string | null | undefined): string[] {
       "activity",
       "system",
       "fonts",
+      "site_editor",
+      "support",
     ];
   }
   if (role === "photographer") return ["gallery"];

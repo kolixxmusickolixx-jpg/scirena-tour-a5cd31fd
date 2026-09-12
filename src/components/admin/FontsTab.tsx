@@ -198,45 +198,6 @@ export function FontsTab() {
         </button>
       </div>
 
-      <div className={`${cardCls} space-y-4`}>
-        <div>
-          <span className={labelCls}>ОБЛАСТИ ПРИМЕНЕНИЯ</span>
-          <p className="text-[0.65rem] leading-relaxed text-muted-foreground">
-            Для каждой области можно выбрать свой шрифт. «По умолчанию» — оставить текущую типографику
-            сайта.
-          </p>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          {FONT_SCOPES.map((scope) => (
-            <div key={scope.id}>
-              <span className={labelCls}>{scope.label.toUpperCase()}</span>
-              <select
-                className={inputCls}
-                value={config.scopes[scope.id] ?? ""}
-                onChange={(e) =>
-                  setConfig({
-                    ...config,
-                    scopes: { ...config.scopes, [scope.id]: e.target.value },
-                  })
-                }
-              >
-                <option value="">По умолчанию</option>
-                {options.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.name}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-1 text-[0.6rem] text-muted-foreground">{scope.hint}</p>
-            </div>
-          ))}
-        </div>
-
-        <button className={btnCls} disabled={saving} onClick={() => void save(config)}>
-          <Save size={14} /> {saving ? "СОХРАНЯЮ…" : "СОХРАНИТЬ ШРИФТЫ"}
-        </button>
-      </div>
     </div>
   );
 }
