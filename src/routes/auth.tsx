@@ -87,7 +87,13 @@ function AuthPage() {
     setError(null);
     setLoading(true);
     try {
-      const { grantToken } = await verifyAdminCode({ data: { challengeId, code } });
+      const result = await verifyAdminCode({ data: { challengeId, code } });
+      if (!result.ok) {
+        setError(result.error);
+        setCode("");
+        return;
+      }
+      const { grantToken } = result;
       const { data, error: err } = await supabase.auth.signInWithPassword({
         email,
         password: passwordRef.current,
