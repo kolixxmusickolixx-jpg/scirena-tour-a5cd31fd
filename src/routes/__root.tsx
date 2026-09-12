@@ -160,6 +160,7 @@ function RootComponent() {
       {isAdminArea ? content : (
         <>
           <SiteFonts />
+          <MobileLayout />
           <MaintenanceGate>{content}</MaintenanceGate>
         </>
       )}
