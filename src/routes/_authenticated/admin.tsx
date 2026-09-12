@@ -381,6 +381,7 @@ function AdminPage() {
             {tab === "activity" && <ActivityTab />}
             {tab === "system" && <SystemTab />}
             {tab === "fonts" && <FontsTab />}
+            {tab === "site_editor" && <SiteEditorTab />}
 
           </div>
         </main>

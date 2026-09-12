@@ -18,6 +18,7 @@ import {
   fontFaceCss,
   parseMobileLayout,
   type ElementOverride,
+  type ElementPatch,
   type MobileLayout,
 } from "@/lib/mobile-editor";
 
@@ -108,8 +109,12 @@ export function SiteEditorTab() {
     };
   }, [fonts.custom]);
 
-  const patch = useCallback((id: string, next: ElementOverride) => {
-    setLayout((prev) => ({ ...prev, [id]: { ...prev[id], ...next } }));
+  const patch = useCallback((id: string, next: ElementPatch) => {
+    setLayout((prev) => {
+      const merged = { ...prev[id], ...next } as Record<string, unknown>;
+      for (const key of Object.keys(merged)) if (merged[key] === undefined) delete merged[key];
+      return { ...prev, [id]: merged as ElementOverride };
+    });
     setDirty(true);
   }, []);
 
