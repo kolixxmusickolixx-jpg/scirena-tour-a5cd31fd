@@ -144,21 +144,28 @@ export async function verifyCode(challengeId: string, code: string) {
   });
 
   if (!res["ok"]) {
+    // Expected user-facing outcomes are returned, not thrown, so the client
+    // shows an inline message instead of an unhandled server error.
+    let message: string;
     switch (res["error"]) {
       case "code_expired":
-        throw new Error("Срок действия кода истёк. Запросите новый.");
+        message = "Срок действия кода истёк. Запросите новый.";
+        break;
       case "too_many":
-        throw new Error("Слишком много попыток. Войдите заново.");
+        message = "Слишком много попыток. Войдите заново.";
+        break;
       case "wrong_code": {
         const left = Number(res["attemptsLeft"] ?? 0);
-        throw new Error(
-          left ? `Неверный код. Осталось попыток: ${left}` : "Слишком много попыток. Войдите заново.",
-        );
+        message = left
+          ? `Неверный код. Осталось попыток: ${left}`
+          : "Слишком много попыток. Войдите заново.";
+        break;
       }
       default:
-        throw new Error("Сессия подтверждения истекла. Войдите заново.");
+        message = "Сессия подтверждения истекла. Войдите заново.";
     }
+    return { ok: false as const, error: message };
   }
 
-  return { grantToken };
+  return { ok: true as const, grantToken };
 }
