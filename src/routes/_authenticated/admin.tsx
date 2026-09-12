@@ -22,6 +22,7 @@ import {
   Clapperboard,
   ScrollText,
   Settings,
+  Smartphone,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SortableList } from "@/components/admin/SortableList";
@@ -40,7 +41,9 @@ import { ActivityTab } from "@/components/admin/ActivityTab";
 import { MediaTab } from "@/components/admin/MediaTab";
 import { SystemTab, SYSTEM_KEYS } from "@/components/admin/SystemTab";
 import { FontsTab } from "@/components/admin/FontsTab";
+import { SiteEditorTab } from "@/components/admin/SiteEditorTab";
 import { FONTS_CONFIG_KEY } from "@/lib/fonts";
+import { MOBILE_LAYOUT_KEY } from "@/lib/mobile-editor";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -84,7 +87,8 @@ type Tab =
   | "admins"
   | "activity"
   | "system"
-  | "fonts";
+  | "fonts"
+  | "site_editor";
 
 const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[] = [
   { id: "analytics", label: "Аналитика", icon: BarChart3, hint: "Посещаемость и источники" },
@@ -99,7 +103,13 @@ const TABS: { id: Tab; label: string; icon: typeof CalendarDays; hint: string }[
   { id: "admins", label: "Администраторы", icon: Users, hint: "Доступы и роли" },
   { id: "activity", label: "Журнал действий", icon: ScrollText, hint: "История всех операций" },
   { id: "system", label: "Системные настройки", icon: Settings, hint: "Тех. работы и фон Hero" },
-  { id: "fonts", label: "Шрифты", icon: Type, hint: "Шрифты и области применения" },
+  { id: "fonts", label: "Шрифты", icon: Type, hint: "Загрузка и удаление шрифтов" },
+  {
+    id: "site_editor",
+    label: "Редактор сайта",
+    icon: Smartphone,
+    hint: "Мобильная версия: позиции и шрифты",
+  },
 ];
 
 
