@@ -132,6 +132,21 @@ export function SiteEditorTab() {
     overrides.id = "__sc-editor-overrides";
     doc.head.appendChild(overrides);
 
+    // The public site injects its own saved mobile styles (also !important).
+    // Blank them inside the preview so live edits are the single source of truth.
+    const stripSaved = () => {
+      doc.querySelectorAll("style").forEach((el) => {
+        if (el.id.startsWith("__sc-editor")) return;
+        if (el.textContent?.includes("data-edit-id")) el.textContent = "";
+      });
+    };
+    stripSaved();
+    new MutationObserver(stripSaved).observe(doc.documentElement, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
     // Never navigate away while editing.
     const block = (e: Event) => {
       e.preventDefault();

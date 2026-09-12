@@ -81,6 +81,7 @@ export function elementRules(
   o: ElementOverride,
   fonts: FontsConfig,
   urls: Record<string, string>,
+  prefix = "",
 ): string {
   const decls: string[] = [];
   const x = o.x ?? 0;
@@ -90,7 +91,7 @@ export function elementRules(
   const family = resolveFontFamily(o.fontId, fonts, urls);
   if (family) decls.push(`font-family:${family} !important`);
   if (!decls.length) return "";
-  return `[data-edit-id="${id}"]{${decls.join(";")};}`;
+  return `${prefix}[data-edit-id="${id}"]{${decls.join(";")};}`;
 }
 
 /** Full mobile-only stylesheet for the public site. */
