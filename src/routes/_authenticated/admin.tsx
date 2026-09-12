@@ -266,6 +266,7 @@ function AdminPage() {
     admins: null,
     activity: null,
     fonts: null,
+    site_editor: null,
 
 
   };

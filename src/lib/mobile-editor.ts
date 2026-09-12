@@ -12,6 +12,14 @@ export type ElementOverride = {
 
 export type MobileLayout = Record<string, ElementOverride>;
 
+/** Same shape, but explicit `undefined` is allowed so a field can be cleared. */
+export type ElementPatch = {
+  x?: number | undefined;
+  y?: number | undefined;
+  fontSize?: number | undefined;
+  fontId?: string | undefined;
+};
+
 /** Elements that can be selected in the mobile editor. */
 export const EDITABLE_ELEMENTS: { id: string; label: string }[] = [
   { id: "nav_logo", label: "Логотип SCIRENA" },
