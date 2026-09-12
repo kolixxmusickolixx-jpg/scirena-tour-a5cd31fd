@@ -81,6 +81,7 @@ export function elementRules(
   o: ElementOverride,
   fonts: FontsConfig,
   urls: Record<string, string>,
+  prefix = "",
 ): string {
   const decls: string[] = [];
   const x = o.x ?? 0;
