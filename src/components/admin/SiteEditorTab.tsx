@@ -32,10 +32,10 @@ const ghostCls =
 const cardCls = "glass rounded-2xl p-5 sm:p-6";
 
 const FRAME_W = 390;
-const FRAME_H = 760;
+const FRAME_H = 560;
 
 const BASE_CSS = `
-[data-edit-id]{cursor:grab !important;}
+[data-edit-id]{cursor:pointer !important;}
 [data-edit-id].__sc-selected{outline:2px solid #E8E8E8 !important;outline-offset:3px !important;}
 html{scroll-behavior:auto !important;}
 `;
