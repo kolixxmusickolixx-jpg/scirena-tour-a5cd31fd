@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Save, RotateCcw, Smartphone } from "lucide-react";
+import {
+  Save,
+  RotateCcw,
+  Smartphone,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   BUILT_IN_FONTS,
@@ -32,10 +40,10 @@ const ghostCls =
 const cardCls = "glass rounded-2xl p-5 sm:p-6";
 
 const FRAME_W = 390;
-const FRAME_H = 760;
+const FRAME_H = 560;
 
 const BASE_CSS = `
-[data-edit-id]{cursor:grab !important;}
+[data-edit-id]{cursor:pointer !important;}
 [data-edit-id].__sc-selected{outline:2px solid #E8E8E8 !important;outline-offset:3px !important;}
 html{scroll-behavior:auto !important;}
 `;
@@ -78,6 +86,8 @@ export function SiteEditorTab() {
   const frameRef = useRef<HTMLIFrameElement>(null);
   const layoutRef = useRef<MobileLayout>({});
   layoutRef.current = layout;
+  const selectedRef = useRef<string | null>(null);
+  selectedRef.current = selected;
 
   useEffect(() => {
     if (layoutRow.data !== undefined) setLayout(parseMobileLayout(layoutRow.data));
@@ -118,7 +128,43 @@ export function SiteEditorTab() {
     setDirty(true);
   }, []);
 
-  /** Wires selection + touch dragging inside the same-origin preview document. */
+  /** Nudges the selected element by 1px steps. */
+  const nudge = useCallback(
+    (dx: number, dy: number) => {
+      const id = selectedRef.current;
+      if (!id) return;
+      const cur = layoutRef.current[id] ?? {};
+      patch(id, { x: (cur.x ?? 0) + dx, y: (cur.y ?? 0) + dy });
+    },
+    [patch],
+  );
+
+  /** Press-and-hold repeats the nudge. */
+  const holdRef = useRef<{ t: ReturnType<typeof setTimeout> | null; i: ReturnType<typeof setInterval> | null }>({
+    t: null,
+    i: null,
+  });
+
+  const stopHold = useCallback(() => {
+    if (holdRef.current.t) clearTimeout(holdRef.current.t);
+    if (holdRef.current.i) clearInterval(holdRef.current.i);
+    holdRef.current = { t: null, i: null };
+  }, []);
+
+  const startHold = useCallback(
+    (dx: number, dy: number) => {
+      stopHold();
+      nudge(dx, dy);
+      holdRef.current.t = setTimeout(() => {
+        holdRef.current.i = setInterval(() => nudge(dx, dy), 30);
+      }, 350);
+    },
+    [nudge, stopHold],
+  );
+
+  useEffect(() => stopHold, [stopHold]);
+
+  /** Wires tap-to-select inside the same-origin preview document. */
   const attach = useCallback(() => {
     const doc = frameRef.current?.contentDocument;
     if (!doc) return;
@@ -155,51 +201,19 @@ export function SiteEditorTab() {
     doc.addEventListener("click", block, true);
     doc.addEventListener("submit", block, true);
 
-    let dragId: string | null = null;
-    let startX = 0;
-    let startY = 0;
-    let originX = 0;
-    let originY = 0;
-
     doc.addEventListener(
       "pointerdown",
       (e: PointerEvent) => {
         const el = (e.target as Element | null)?.closest?.("[data-edit-id]") as HTMLElement | null;
         if (!el) return;
-        const id = el.dataset["editId"]!;
         e.preventDefault();
-        setSelected(id);
-        dragId = id;
-        startX = e.clientX;
-        startY = e.clientY;
-        const current = layoutRef.current[id] ?? {};
-        originX = current.x ?? 0;
-        originY = current.y ?? 0;
+        setSelected(el.dataset["editId"]!);
       },
       true,
     );
-
-    doc.addEventListener(
-      "pointermove",
-      (e: PointerEvent) => {
-        if (!dragId) return;
-        e.preventDefault();
-        patch(dragId, {
-          x: Math.round(originX + (e.clientX - startX)),
-          y: Math.round(originY + (e.clientY - startY)),
-        });
-      },
-      true,
-    );
-
-    const end = () => {
-      dragId = null;
-    };
-    doc.addEventListener("pointerup", end, true);
-    doc.addEventListener("pointercancel", end, true);
 
     setReady(true);
-  }, [patch]);
+  }, []);
 
   // Push live overrides + selection outline into the preview document.
   useEffect(() => {
@@ -254,20 +268,27 @@ export function SiteEditorTab() {
   ];
   const touched = Object.keys(layout).filter((id) => Object.keys(layout[id] ?? {}).length > 0);
 
+  const arrowCls =
+    "inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-secondary/40 text-foreground transition-colors active:bg-secondary disabled:opacity-40";
+
+  const holdProps = (dx: number, dy: number) => ({
+    onPointerDown: (e: React.PointerEvent) => {
+      e.preventDefault();
+      startHold(dx, dy);
+    },
+    onPointerUp: stopHold,
+    onPointerLeave: stopHold,
+    onPointerCancel: stopHold,
+    disabled: !selected,
+    className: arrowCls,
+    style: { touchAction: "none" as const },
+  });
+
   return (
     <div className="space-y-4">
-      <div className={`${cardCls} space-y-2`}>
-        <span className={labelCls}>МОБИЛЬНАЯ ВЕРСИЯ</span>
-        <p className="text-[0.65rem] leading-relaxed text-muted-foreground">
-          Нажмите на элемент в превью, чтобы выделить его, и перетащите пальцем. Ниже можно задать
-          размер и шрифт текста, а также точные координаты. Настройки применяются только к мобильной
-          версии сайта — вид на компьютере не меняется.
-        </p>
-      </div>
-
       <div className={`${cardCls} space-y-3`}>
         <div className="flex items-center gap-2 text-[0.6rem] tracking-[0.22em] text-muted-foreground">
-          <Smartphone size={14} /> ПРЕВЬЮ 390 × 760
+          <Smartphone size={14} /> ПРЕВЬЮ {FRAME_W} × {FRAME_H}
         </div>
         <div className="flex justify-center overflow-hidden rounded-3xl border border-border bg-black/40 p-3">
           <iframe
@@ -278,9 +299,12 @@ export function SiteEditorTab() {
             width={FRAME_W}
             height={FRAME_H}
             className="max-w-full rounded-2xl border-0 bg-black"
-            style={{ touchAction: "none" }}
           />
         </div>
+        <p className="text-[0.6rem] leading-relaxed text-muted-foreground">
+          Нажмите на элемент в превью, чтобы выбрать его. Изменения видны сразу; кнопка «Сохранить»
+          записывает их в базу. Настройки применяются только к мобильной версии сайта.
+        </p>
       </div>
 
       <div className={`${cardCls} space-y-4`}>
@@ -300,85 +324,108 @@ export function SiteEditorTab() {
           </select>
         </div>
 
-        {selected ? (
-          <>
-            <p className="text-[0.65rem] text-muted-foreground">{elementLabel(selected)}</p>
-
-            <div>
-              <span className={labelCls}>РАЗМЕР ШРИФТА{current.fontSize ? `: ${current.fontSize}px` : ""}</span>
-              <input
-                type="range"
-                min={8}
-                max={120}
-                step={1}
-                value={current.fontSize ?? 16}
-                onChange={(e) => patch(selected, { fontSize: Number(e.target.value) })}
-                className="w-full accent-foreground"
-              />
-              <button
-                className="mt-2 text-[0.6rem] tracking-[0.2em] text-muted-foreground underline"
-                onClick={() => patch(selected, { fontSize: undefined })}
-              >
-                СБРОСИТЬ РАЗМЕР
+        <div className="flex flex-wrap items-center gap-5">
+          <div>
+            <span className={labelCls}>ПЕРЕМЕЩЕНИЕ (ШАГ 1 PX)</span>
+            <div className="grid w-[9.5rem] grid-cols-3 gap-1.5">
+              <span />
+              <button aria-label="Вверх" {...holdProps(0, -1)}>
+                <ArrowUp size={16} />
               </button>
+              <span />
+              <button aria-label="Влево" {...holdProps(-1, 0)}>
+                <ArrowLeft size={16} />
+              </button>
+              <span />
+              <button aria-label="Вправо" {...holdProps(1, 0)}>
+                <ArrowRight size={16} />
+              </button>
+              <span />
+              <button aria-label="Вниз" {...holdProps(0, 1)}>
+                <ArrowDown size={16} />
+              </button>
+              <span />
             </div>
+          </div>
 
+          <div className="grid flex-1 grid-cols-2 gap-3 min-w-[12rem]">
             <div>
-              <span className={labelCls}>ШРИФТ</span>
-              <select
+              <span className={labelCls}>X (PX)</span>
+              <input
+                type="number"
                 className={inputCls}
-                value={current.fontId ?? ""}
-                onChange={(e) => patch(selected, { fontId: e.target.value || undefined })}
-              >
-                <option value="">По умолчанию</option>
-                {fontOptions.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.name}
-                  </option>
-                ))}
-              </select>
+                disabled={!selected}
+                value={current.x ?? 0}
+                onChange={(e) => selected && patch(selected, { x: Number(e.target.value) })}
+              />
             </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <span className={labelCls}>ПОЗИЦИЯ X (PX)</span>
-                <input
-                  type="number"
-                  className={inputCls}
-                  value={current.x ?? 0}
-                  onChange={(e) => patch(selected, { x: Number(e.target.value) })}
-                />
-              </div>
-              <div>
-                <span className={labelCls}>ПОЗИЦИЯ Y (PX)</span>
-                <input
-                  type="number"
-                  className={inputCls}
-                  value={current.y ?? 0}
-                  onChange={(e) => patch(selected, { y: Number(e.target.value) })}
-                />
-              </div>
+            <div>
+              <span className={labelCls}>Y (PX)</span>
+              <input
+                type="number"
+                className={inputCls}
+                disabled={!selected}
+                value={current.y ?? 0}
+                onChange={(e) => selected && patch(selected, { y: Number(e.target.value) })}
+              />
             </div>
+          </div>
+        </div>
 
-            <button className={ghostCls} onClick={resetSelected}>
-              <RotateCcw size={14} /> СБРОСИТЬ ЭЛЕМЕНТ
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <span className={labelCls}>
+              РАЗМЕР ШРИФТА{current.fontSize ? `: ${current.fontSize}px` : ""}
+            </span>
+            <input
+              type="range"
+              min={8}
+              max={120}
+              step={1}
+              disabled={!selected}
+              value={current.fontSize ?? 16}
+              onChange={(e) => selected && patch(selected, { fontSize: Number(e.target.value) })}
+              className="w-full accent-foreground"
+            />
+            <button
+              className="mt-1 text-[0.6rem] tracking-[0.2em] text-muted-foreground underline"
+              disabled={!selected}
+              onClick={() => selected && patch(selected, { fontSize: undefined })}
+            >
+              СБРОСИТЬ РАЗМЕР
             </button>
-          </>
-        ) : (
-          <p className="text-[0.65rem] text-muted-foreground">
-            Нажмите на элемент в превью или выберите его из списка.
-          </p>
-        )}
-      </div>
+          </div>
 
-      <div className={`${cardCls} flex flex-wrap items-center gap-3`}>
-        <button className={btnCls} disabled={saving || !dirty} onClick={() => void save()}>
-          <Save size={14} /> {saving ? "СОХРАНЯЮ…" : "СОХРАНИТЬ"}
-        </button>
-        <span className="text-[0.6rem] tracking-[0.2em] text-muted-foreground">
-          НАСТРОЕНО ЭЛЕМЕНТОВ: {touched.length}
-          {dirty ? " · ЕСТЬ НЕСОХРАНЁННЫЕ ИЗМЕНЕНИЯ" : ""}
-        </span>
+          <div>
+            <span className={labelCls}>ШРИФТ</span>
+            <select
+              className={inputCls}
+              disabled={!selected}
+              value={current.fontId ?? ""}
+              onChange={(e) => selected && patch(selected, { fontId: e.target.value || undefined })}
+            >
+              <option value="">По умолчанию</option>
+              {fontOptions.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <button className={btnCls} disabled={saving || !dirty} onClick={() => void save()}>
+            <Save size={14} /> {saving ? "СОХРАНЯЮ…" : "СОХРАНИТЬ"}
+          </button>
+          <button className={ghostCls} disabled={!selected} onClick={resetSelected}>
+            <RotateCcw size={14} /> СБРОСИТЬ ЭЛЕМЕНТ
+          </button>
+          <span className="text-[0.6rem] tracking-[0.2em] text-muted-foreground">
+            {selected ? elementLabel(selected) : "ЭЛЕМЕНТ НЕ ВЫБРАН"} · НАСТРОЕНО: {touched.length}
+            {dirty ? " · ЕСТЬ НЕСОХРАНЁННЫЕ ИЗМЕНЕНИЯ" : ""}
+          </span>
+        </div>
       </div>
     </div>
   );
