@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Save, RotateCcw, Smartphone } from "lucide-react";
+import {
+  Save,
+  RotateCcw,
+  Smartphone,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   BUILT_IN_FONTS,
