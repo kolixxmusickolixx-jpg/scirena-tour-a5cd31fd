@@ -5,12 +5,20 @@ import {
   Save,
   RotateCcw,
   Smartphone,
+  MousePointer2,
+  Move,
+  Scaling,
+  SlidersHorizontal,
+  X,
+  Minus,
+  Plus,
   ArrowUp,
   ArrowDown,
   ArrowLeft,
   ArrowRight,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   BUILT_IN_FONTS,
   FONTS_CONFIG_KEY,
@@ -42,6 +50,8 @@ const cardCls = "glass rounded-2xl p-5 sm:p-6";
 const FRAME_W = 390;
 const FRAME_H = 560;
 
+type MobileTool = "select" | "move" | "size" | "settings" | null;
+
 const BASE_CSS = `
 [data-edit-id]{cursor:pointer !important;}
 [data-edit-id].__sc-selected{outline:2px solid #E8E8E8 !important;outline-offset:3px !important;}
@@ -49,6 +59,7 @@ html{scroll-behavior:auto !important;}
 `;
 
 export function SiteEditorTab() {
+  const isMobile = useIsMobile();
   const layoutRow = useQuery({
     queryKey: ["admin", "mobile-layout"],
     queryFn: async (): Promise<string> => {
@@ -82,6 +93,7 @@ export function SiteEditorTab() {
   const [fonts, setFonts] = useState<FontsConfig>(emptyFontsConfig());
   const [fontUrls, setFontUrls] = useState<Record<string, string>>({});
   const [ready, setReady] = useState(false);
+  const [mobileTool, setMobileTool] = useState<MobileTool>(null);
 
   const frameRef = useRef<HTMLIFrameElement>(null);
   const layoutRef = useRef<MobileLayout>({});
@@ -206,8 +218,10 @@ export function SiteEditorTab() {
       (e: PointerEvent) => {
         const el = (e.target as Element | null)?.closest?.("[data-edit-id]") as HTMLElement | null;
         if (!el) return;
+        const editId = el.dataset["editId"];
+        if (!editId) return;
         e.preventDefault();
-        setSelected(el.dataset["editId"]!);
+        setSelected(editId);
       },
       true,
     );
@@ -283,6 +297,273 @@ export function SiteEditorTab() {
     className: arrowCls,
     style: { touchAction: "none" as const },
   });
+
+  const setMobileToolOpen = (tool: Exclude<MobileTool, null>) => {
+    setMobileTool((currentTool) => (currentTool === tool ? null : tool));
+  };
+
+  if (isMobile) {
+    const mobileArrowCls =
+      "inline-flex h-12 w-12 touch-none items-center justify-center rounded-xl border border-border bg-secondary text-foreground transition-colors active:bg-foreground active:text-background disabled:opacity-35";
+    const mobileHoldProps = (dx: number, dy: number) => ({
+      ...holdProps(dx, dy),
+      className: mobileArrowCls,
+    });
+    const mobileTools: {
+      id: Exclude<MobileTool, null>;
+      label: string;
+      icon: typeof MousePointer2;
+    }[] = [
+      { id: "select", label: "Выбрать", icon: MousePointer2 },
+      { id: "move", label: "Переместить", icon: Move },
+      { id: "size", label: "Размер", icon: Scaling },
+      { id: "settings", label: "Настройки", icon: SlidersHorizontal },
+    ];
+
+    return (
+      <div className="fixed inset-0 z-[70] flex h-[100dvh] flex-col overflow-hidden bg-background">
+        <header className="grid min-h-16 shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border bg-background/95 px-4 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))]">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-foreground">Редактор сайта</p>
+            <p className="truncate text-[0.55rem] text-muted-foreground">Мобильная версия</p>
+          </div>
+          <button
+            type="button"
+            className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-primary px-3 text-[0.65rem] font-semibold text-primary-foreground disabled:opacity-45"
+            disabled={saving || !dirty}
+            onClick={() => void save()}
+          >
+            <Save size={14} /> {saving ? "Сохраняю…" : "Сохранить"}
+          </button>
+        </header>
+
+        <div className="relative min-h-0 flex-1 overflow-hidden bg-background">
+          <iframe
+            ref={frameRef}
+            title="Мобильное превью сайта"
+            src="/"
+            onLoad={attach}
+            className="h-full w-full border-0 bg-background"
+          />
+
+          {selected && (
+            <div className="pointer-events-none absolute left-3 top-3 max-w-[calc(100%-1.5rem)] rounded-md bg-primary px-2.5 py-1 text-[0.6rem] font-semibold text-primary-foreground shadow-lg">
+              <span className="block truncate">{elementLabel(selected)}</span>
+            </div>
+          )}
+
+          {mobileTool && (
+            <section className="absolute inset-x-0 bottom-0 z-20 max-h-[65dvh] overflow-y-auto rounded-t-2xl border-t border-border bg-card px-4 pb-4 pt-3 shadow-2xl">
+              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-muted" />
+              <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-foreground">
+                    {selected ? elementLabel(selected) : "Элемент не выбран"}
+                  </p>
+                  <p className="mt-0.5 text-[0.6rem] text-muted-foreground">
+                    {selected ? "Изменения видны сразу" : "Нажмите на элемент в preview"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Закрыть панель"
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground"
+                  onClick={() => setMobileTool(null)}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {mobileTool === "select" && (
+                <label className="block">
+                  <span className={labelCls}>ВЫБРАТЬ ЭЛЕМЕНТ</span>
+                  <select
+                    className={inputCls}
+                    value={selected ?? ""}
+                    onChange={(e) => setSelected(e.target.value || null)}
+                  >
+                    <option value="">— не выбран —</option>
+                    {EDITABLE_ELEMENTS.map((el) => (
+                      <option key={el.id} value={el.id}>
+                        {el.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+
+              {mobileTool === "move" && (
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-5">
+                  <div className="min-w-0 space-y-2">
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+                      <span className="text-xs text-muted-foreground">X</span>
+                      <input
+                        type="number"
+                        className={inputCls}
+                        disabled={!selected}
+                        value={current.x ?? 0}
+                        onChange={(e) => selected && patch(selected, { x: Number(e.target.value) })}
+                      />
+                    </div>
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+                      <span className="text-xs text-muted-foreground">Y</span>
+                      <input
+                        type="number"
+                        className={inputCls}
+                        disabled={!selected}
+                        value={current.y ?? 0}
+                        onChange={(e) => selected && patch(selected, { y: Number(e.target.value) })}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid w-[9.75rem] grid-cols-3 gap-1.5">
+                    <span />
+                    <button aria-label="Вверх" {...mobileHoldProps(0, -1)}>
+                      <ArrowUp size={18} />
+                    </button>
+                    <span />
+                    <button aria-label="Влево" {...mobileHoldProps(-1, 0)}>
+                      <ArrowLeft size={18} />
+                    </button>
+                    <span className="grid place-items-center text-[0.55rem] text-muted-foreground">1 PX</span>
+                    <button aria-label="Вправо" {...mobileHoldProps(1, 0)}>
+                      <ArrowRight size={18} />
+                    </button>
+                    <span />
+                    <button aria-label="Вниз" {...mobileHoldProps(0, 1)}>
+                      <ArrowDown size={18} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {mobileTool === "size" && (
+                <div>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <span className={labelCls}>РАЗМЕР ШРИФТА</span>
+                    <span className="text-sm tabular-nums text-foreground">{current.fontSize ?? 16} px</span>
+                  </div>
+                  <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-3">
+                    <button
+                      type="button"
+                      aria-label="Уменьшить размер"
+                      className={mobileArrowCls}
+                      disabled={!selected || (current.fontSize ?? 16) <= 8}
+                      onClick={() => selected && patch(selected, { fontSize: Math.max(8, (current.fontSize ?? 16) - 1) })}
+                    >
+                      <Minus size={17} />
+                    </button>
+                    <input
+                      type="range"
+                      min={8}
+                      max={120}
+                      step={1}
+                      disabled={!selected}
+                      value={current.fontSize ?? 16}
+                      onChange={(e) => selected && patch(selected, { fontSize: Number(e.target.value) })}
+                      className="w-full accent-foreground"
+                    />
+                    <button
+                      type="button"
+                      aria-label="Увеличить размер"
+                      className={mobileArrowCls}
+                      disabled={!selected || (current.fontSize ?? 16) >= 120}
+                      onClick={() => selected && patch(selected, { fontSize: Math.min(120, (current.fontSize ?? 16) + 1) })}
+                    >
+                      <Plus size={17} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {mobileTool === "settings" && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="block min-w-0">
+                      <span className={labelCls}>X (PX)</span>
+                      <input
+                        type="number"
+                        className={inputCls}
+                        disabled={!selected}
+                        value={current.x ?? 0}
+                        onChange={(e) => selected && patch(selected, { x: Number(e.target.value) })}
+                      />
+                    </label>
+                    <label className="block min-w-0">
+                      <span className={labelCls}>Y (PX)</span>
+                      <input
+                        type="number"
+                        className={inputCls}
+                        disabled={!selected}
+                        value={current.y ?? 0}
+                        onChange={(e) => selected && patch(selected, { y: Number(e.target.value) })}
+                      />
+                    </label>
+                  </div>
+                  <label className="block">
+                    <span className={labelCls}>ШРИФТ</span>
+                    <select
+                      className={inputCls}
+                      disabled={!selected}
+                      value={current.fontId ?? ""}
+                      onChange={(e) => selected && patch(selected, { fontId: e.target.value || undefined })}
+                    >
+                      <option value="">По умолчанию</option>
+                      {fontOptions.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="block">
+                    <span className={labelCls}>РАЗМЕР ШРИФТА: {current.fontSize ?? 16} PX</span>
+                    <input
+                      type="range"
+                      min={8}
+                      max={120}
+                      step={1}
+                      disabled={!selected}
+                      value={current.fontSize ?? 16}
+                      onChange={(e) => selected && patch(selected, { fontSize: Number(e.target.value) })}
+                      className="w-full accent-foreground"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    className={`${ghostCls} w-full justify-center`}
+                    disabled={!selected}
+                    onClick={resetSelected}
+                  >
+                    <RotateCcw size={14} /> СБРОСИТЬ ЭЛЕМЕНТ
+                  </button>
+                </div>
+              )}
+            </section>
+          )}
+        </div>
+
+        <nav className="grid shrink-0 grid-cols-4 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]">
+          {mobileTools.map(({ id, label, icon: Icon }) => {
+            const active = mobileTool === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                className={`flex min-h-[4.5rem] min-w-0 flex-col items-center justify-center gap-1 px-1 text-[0.55rem] transition-colors ${
+                  active ? "bg-secondary text-foreground" : "text-muted-foreground"
+                }`}
+                onClick={() => setMobileToolOpen(id)}
+              >
+                <Icon size={18} />
+                <span className="truncate">{label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
