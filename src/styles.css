@@ -106,6 +106,19 @@
     backdrop-filter: none;
     background: oklch(0.13 0 0 / 85%);
   }
+
+  .admin-shell :where(input, select, textarea) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .admin-shell :where(button, a, label)[class*="inline-flex"] {
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
 }
 
 

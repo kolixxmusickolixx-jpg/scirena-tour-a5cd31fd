@@ -273,21 +273,21 @@ function AdminPage() {
 
 
   return (
-    <div className="min-h-screen lg:flex">
+    <div className="admin-shell min-h-screen max-w-full overflow-x-hidden lg:flex">
       {/* Sidebar */}
       <aside
-        className={`glass fixed inset-y-0 left-0 z-50 flex w-[82%] max-w-xs flex-col border-r border-border p-6 transition-transform duration-500 lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:translate-x-0 ${
+        className={`glass fixed inset-y-0 left-0 z-50 flex h-[100dvh] w-[82%] max-w-xs flex-col overflow-hidden border-r border-border p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] transition-transform duration-500 lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:translate-x-0 lg:pb-6 ${
           navOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div>
+        <div className="shrink-0">
           <p className="font-display text-lg font-extrabold tracking-[0.2em]">SCIRENA</p>
           <p className="mt-1 text-[0.55rem] tracking-[0.3em] text-muted-foreground">
             {roleLabel(role).toUpperCase()}
           </p>
         </div>
 
-        <nav className="mt-8 flex-1 space-y-1.5">
+        <nav className="mt-8 min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain pr-1">
           {visibleTabs.map(({ id, label, icon: Icon }) => {
             const isActive = tab === id;
             return (
@@ -315,7 +315,7 @@ function AdminPage() {
           })}
         </nav>
 
-        <div className="space-y-2 border-t border-border pt-5">
+        <div className="shrink-0 space-y-2 border-t border-border pt-5">
           <Link to="/" className={`${ghostCls} w-full justify-center`}>
             <ExternalLink size={14} /> НА САЙТ
           </Link>
@@ -334,7 +334,7 @@ function AdminPage() {
       )}
 
       {/* Content */}
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 max-w-full flex-1">
         <header className="sticky top-0 z-30 border-b border-border bg-background/80 px-5 py-4 backdrop-blur-xl sm:px-8">
           <div className="flex items-center gap-4">
             <button
@@ -355,8 +355,8 @@ function AdminPage() {
           </div>
         </header>
 
-        <main className="px-5 py-8 sm:px-8 sm:py-10">
-          <div className="mx-auto max-w-4xl space-y-4">
+        <main className="min-w-0 max-w-full px-4 py-8 sm:px-8 sm:py-10">
+          <div className="mx-auto min-w-0 max-w-4xl space-y-4">
             {tab === "analytics" && <AnalyticsTab />}
             {tab === "shows" && <ShowsTab rows={shows.data ?? []} onChange={() => refresh("shows")} />}
             {tab === "content" && (
