@@ -78,6 +78,8 @@ export function SiteEditorTab() {
   const frameRef = useRef<HTMLIFrameElement>(null);
   const layoutRef = useRef<MobileLayout>({});
   layoutRef.current = layout;
+  const selectedRef = useRef<string | null>(null);
+  selectedRef.current = selected;
 
   useEffect(() => {
     if (layoutRow.data !== undefined) setLayout(parseMobileLayout(layoutRow.data));
@@ -118,7 +120,43 @@ export function SiteEditorTab() {
     setDirty(true);
   }, []);
 
-  /** Wires selection + touch dragging inside the same-origin preview document. */
+  /** Nudges the selected element by 1px steps. */
+  const nudge = useCallback(
+    (dx: number, dy: number) => {
+      const id = selectedRef.current;
+      if (!id) return;
+      const cur = layoutRef.current[id] ?? {};
+      patch(id, { x: (cur.x ?? 0) + dx, y: (cur.y ?? 0) + dy });
+    },
+    [patch],
+  );
+
+  /** Press-and-hold repeats the nudge. */
+  const holdRef = useRef<{ t: ReturnType<typeof setTimeout> | null; i: ReturnType<typeof setInterval> | null }>({
+    t: null,
+    i: null,
+  });
+
+  const stopHold = useCallback(() => {
+    if (holdRef.current.t) clearTimeout(holdRef.current.t);
+    if (holdRef.current.i) clearInterval(holdRef.current.i);
+    holdRef.current = { t: null, i: null };
+  }, []);
+
+  const startHold = useCallback(
+    (dx: number, dy: number) => {
+      stopHold();
+      nudge(dx, dy);
+      holdRef.current.t = setTimeout(() => {
+        holdRef.current.i = setInterval(() => nudge(dx, dy), 30);
+      }, 350);
+    },
+    [nudge, stopHold],
+  );
+
+  useEffect(() => stopHold, [stopHold]);
+
+  /** Wires tap-to-select inside the same-origin preview document. */
   const attach = useCallback(() => {
     const doc = frameRef.current?.contentDocument;
     if (!doc) return;
@@ -155,51 +193,19 @@ export function SiteEditorTab() {
     doc.addEventListener("click", block, true);
     doc.addEventListener("submit", block, true);
 
-    let dragId: string | null = null;
-    let startX = 0;
-    let startY = 0;
-    let originX = 0;
-    let originY = 0;
-
     doc.addEventListener(
       "pointerdown",
       (e: PointerEvent) => {
         const el = (e.target as Element | null)?.closest?.("[data-edit-id]") as HTMLElement | null;
         if (!el) return;
-        const id = el.dataset["editId"]!;
         e.preventDefault();
-        setSelected(id);
-        dragId = id;
-        startX = e.clientX;
-        startY = e.clientY;
-        const current = layoutRef.current[id] ?? {};
-        originX = current.x ?? 0;
-        originY = current.y ?? 0;
+        setSelected(el.dataset["editId"]!);
       },
       true,
     );
-
-    doc.addEventListener(
-      "pointermove",
-      (e: PointerEvent) => {
-        if (!dragId) return;
-        e.preventDefault();
-        patch(dragId, {
-          x: Math.round(originX + (e.clientX - startX)),
-          y: Math.round(originY + (e.clientY - startY)),
-        });
-      },
-      true,
-    );
-
-    const end = () => {
-      dragId = null;
-    };
-    doc.addEventListener("pointerup", end, true);
-    doc.addEventListener("pointercancel", end, true);
 
     setReady(true);
-  }, [patch]);
+  }, []);
 
   // Push live overrides + selection outline into the preview document.
   useEffect(() => {
