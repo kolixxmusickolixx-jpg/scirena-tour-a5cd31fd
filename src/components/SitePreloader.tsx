@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 
 const MINIMUM_DURATION = 4400;
-const MAXIMUM_DURATION = 7000;
-
 export function SitePreloader() {
   const [leaving, setLeaving] = useState(false);
   const [visible, setVisible] = useState(true);
@@ -13,20 +11,12 @@ export function SitePreloader() {
 
     document.documentElement.classList.add("preloader-active");
 
-    const finish = () => {
-      const elapsed = performance.now() - startedAt;
-      const minimum = reduceMotion ? 700 : MINIMUM_DURATION;
-      window.setTimeout(() => setLeaving(true), Math.max(0, minimum - elapsed));
-    };
-
-    if (document.readyState === "complete") finish();
-    else window.addEventListener("load", finish, { once: true });
-
-    const hardStop = window.setTimeout(() => setLeaving(true), reduceMotion ? 1000 : MAXIMUM_DURATION);
+    const elapsed = performance.now() - startedAt;
+    const minimum = reduceMotion ? 700 : MINIMUM_DURATION;
+    const finishTimer = window.setTimeout(() => setLeaving(true), Math.max(0, minimum - elapsed));
 
     return () => {
-      window.removeEventListener("load", finish);
-      window.clearTimeout(hardStop);
+      window.clearTimeout(finishTimer);
       document.documentElement.classList.remove("preloader-active");
     };
   }, []);
