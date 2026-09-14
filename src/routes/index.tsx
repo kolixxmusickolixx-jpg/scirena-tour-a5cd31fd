@@ -7,6 +7,7 @@ import { ResponsiveImage } from "@/components/ResponsiveImage";
 import { Gallery } from "@/components/Gallery";
 import { Releases } from "@/components/Releases";
 import { RichText } from "@/components/RichText";
+import { SitePreloader } from "@/components/SitePreloader";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -85,6 +86,7 @@ function Index() {
 
   return (
     <main className="relative">
+      <SitePreloader />
       <Nav />
       <Hero heroRef={heroRef} scale={scale} y={y} fade={fade} data={data} />
       <Cities data={data} />
