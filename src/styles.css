@@ -155,17 +155,10 @@ html.preloader-active body {
 }
 
 .site-preloader__mark path {
+  fill: none;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
   animation: golden-sound-draw 1.15s cubic-bezier(0.65, 0, 0.35, 1) 2.65s forwards;
-}
-
-.site-preloader__mark path:nth-child(2) {
-  animation-delay: 2.78s;
-}
-
-.site-preloader__mark path:nth-child(3) {
-  animation-delay: 2.9s;
 }
 
 @keyframes scirena-fill {
