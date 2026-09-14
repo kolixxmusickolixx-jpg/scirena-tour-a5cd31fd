@@ -87,6 +87,107 @@
   }
 }
 
+html.preloader-active,
+html.preloader-active body {
+  overflow: hidden;
+}
+
+.site-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--color-background);
+  opacity: 1;
+  transition: opacity 600ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.site-preloader--leaving {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.site-preloader__content {
+  display: flex;
+  width: min(82vw, 920px);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.site-preloader__word {
+  position: relative;
+  width: 100%;
+  font-family: var(--font-display);
+  font-size: clamp(2.15rem, 10vw, 7.8rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.site-preloader__word-ghost {
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in oklch, var(--color-foreground) 18%, transparent);
+}
+
+.site-preloader__word-fill {
+  position: absolute;
+  inset: 0;
+  color: var(--color-foreground);
+  clip-path: inset(100% 0 0 0);
+  animation: scirena-fill 2.5s cubic-bezier(0.65, 0, 0.35, 1) 200ms forwards;
+}
+
+.site-preloader__mark {
+  width: clamp(108px, 20vw, 190px);
+  height: auto;
+  margin-top: clamp(2.25rem, 6vh, 4.5rem);
+  overflow: visible;
+  fill: none;
+  stroke: var(--color-foreground);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.site-preloader__mark path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: golden-sound-draw 1.15s cubic-bezier(0.65, 0, 0.35, 1) 2.65s forwards;
+}
+
+.site-preloader__mark path:nth-child(2) {
+  animation-delay: 2.78s;
+}
+
+.site-preloader__mark path:nth-child(3) {
+  animation-delay: 2.9s;
+}
+
+@keyframes scirena-fill {
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes golden-sound-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-preloader {
+    transition-duration: 200ms;
+  }
+
+  .site-preloader__word-fill,
+  .site-preloader__mark path {
+    animation-delay: 0ms;
+    animation-duration: 500ms;
+  }
+}
+
 @utility glass {
   background: var(--glass);
   border: 1px solid var(--color-border);
