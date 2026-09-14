@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const MINIMUM_DURATION = 4400;
+const MINIMUM_DURATION = 3900;
 export function SitePreloader() {
   const [leaving, setLeaving] = useState(false);
   const [visible, setVisible] = useState(true);
@@ -23,7 +23,7 @@ export function SitePreloader() {
 
   useEffect(() => {
     if (!leaving) return;
-    const remove = window.setTimeout(() => setVisible(false), 700);
+    const remove = window.setTimeout(() => setVisible(false), 600);
     return () => window.clearTimeout(remove);
   }, [leaving]);
 
